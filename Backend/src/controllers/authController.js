@@ -127,7 +127,7 @@ const login = catchAsync(async (req, res, next) => {
     message: result.message,
     data: {
       user: result.data.user,
-      tokens: result.data.tokens
+      authToken: result.data.tokens.accessToken
     }
   });
 });

@@ -54,7 +54,7 @@ const registerDoctor = async (doctorData) => {
             licenseNumber,
             qualifications: qualifications || [],
             hospitalAffiliations: hospitalAffiliations || [],
-            status: ACCOUNT_STATUS.PENDING,
+            status: ACCOUNT_STATUS.APPROVED,
         });
 
         // Generate email verification code

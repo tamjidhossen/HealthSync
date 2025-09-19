@@ -181,7 +181,7 @@ const doctorSchema = new mongoose.Schema(
         values: Object.values(ACCOUNT_STATUS),
         message: 'Please select a valid account status',
       },
-      default: ACCOUNT_STATUS.PENDING,
+      default: ACCOUNT_STATUS.APPROVED,
     },
     emailVerificationCode: {
       type: String,
@@ -197,7 +197,7 @@ const doctorSchema = new mongoose.Schema(
     },
     isVerified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     verifiedBy: {
       type: mongoose.Schema.Types.ObjectId,
