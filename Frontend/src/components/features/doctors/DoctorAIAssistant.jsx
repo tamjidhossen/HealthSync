@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { doctorData } from "@/data/doctor-data";
+import { sendChatMessage } from "@/services/api/chat-api";
 
 export function DoctorAIAssistant() {
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -69,29 +70,30 @@ export function DoctorAIAssistant() {
     setMessages((prev) => [...prev, loadingMessage]);
 
     try {
-      // Simulate AI response delay
-      setTimeout(() => {
-        const botResponse = {
-          id: Date.now() + 1,
-          type: "bot",
-          content: generateDoctorAIResponse(inputMessage, selectedPatient),
-          timestamp: new Date(),
-          responseTime: (Math.random() * 2 + 1).toFixed(1),
-        };
+      // Call the real AI API
+      const response = await sendChatMessage(inputMessage, selectedPatient.id);
 
-        setMessages((prev) =>
-          prev.filter((msg) => msg.id !== "loading").concat(botResponse)
-        );
-        setIsLoading(false);
-      }, 1500);
+      const botResponse = {
+        id: Date.now() + 1,
+        type: "bot",
+        content: response.response,
+        timestamp: new Date(),
+        responseTime: response.response_time,
+        status: response.status,
+      };
+
+      setMessages((prev) =>
+        prev.filter((msg) => msg.id !== "loading").concat(botResponse)
+      );
+      setIsLoading(false);
     } catch (error) {
-      console.error("Chat error:", error);
+      console.error("Chat API error:", error);
 
       const errorResponse = {
         id: Date.now() + 1,
         type: "bot",
         content:
-          "I'm sorry, I encountered an error while analyzing the medical data. Please try again or consult with other medical resources.",
+          "I'm sorry, I encountered an error while analyzing the medical data. Please ensure the AI service is running and try again.",
         timestamp: new Date(),
         isError: true,
       };
@@ -101,99 +103,6 @@ export function DoctorAIAssistant() {
       );
       setIsLoading(false);
     }
-  };
-
-  const generateDoctorAIResponse = (message, patient) => {
-    const lowerMessage = message.toLowerCase();
-
-    // Medical history responses
-    if (
-      lowerMessage.includes("history") ||
-      lowerMessage.includes("medical record")
-    ) {
-      return `${patient.name}'s medical history shows: 
-      • Current condition: ${patient.condition}
-      • Age: ${patient.age}, Gender: ${patient.gender}
-      • Blood type: ${patient.bloodType}
-      • Status: ${patient.status}
-      • Last visit: ${patient.lastVisit}
-      • Current vitals: BP ${patient.vitalSigns?.bloodPressure}, HR ${patient.vitalSigns?.heartRate}
-      
-      Recent medical history includes documented treatments and ongoing care. Would you like me to elaborate on any specific aspect?`;
-    }
-
-    // Medication-related responses
-    if (
-      lowerMessage.includes("medication") ||
-      lowerMessage.includes("prescription") ||
-      lowerMessage.includes("drug")
-    ) {
-      const medications = patient.currentMedications || [];
-      const medsList =
-        medications.length > 0
-          ? medications
-              .map((med) => `${med.name} ${med.dosage} (${med.frequency})`)
-              .join(", ")
-          : "No current medications on record";
-
-      return `Current medications for ${patient.name}:
-      ${medsList}
-      
-      Based on the patient's condition (${patient.condition}) and current status (${patient.status}), I can help review drug interactions, dosage adjustments, or suggest additional treatments. What specific medication inquiry do you have?`;
-    }
-
-    // Diagnosis and assessment
-    if (
-      lowerMessage.includes("diagnosis") ||
-      lowerMessage.includes("assess") ||
-      lowerMessage.includes("symptoms")
-    ) {
-      return `For ${patient.name}'s current condition (${patient.condition}):
-      • Current status: ${patient.status}
-      • Vital signs: ${patient.vitalSigns?.bloodPressure} BP, ${patient.vitalSigns?.heartRate} HR
-      • Patient profile: ${patient.age}-year-old ${patient.gender}
-      
-      Based on the medical data, I recommend continuing current monitoring protocols. The patient's condition appears ${patient.status}. Would you like me to suggest specific diagnostic tests or treatment modifications?`;
-    }
-
-    // Lab and test results
-    if (
-      lowerMessage.includes("lab") ||
-      lowerMessage.includes("test") ||
-      lowerMessage.includes("result")
-    ) {
-      return `Lab and diagnostic recommendations for ${patient.name}:
-      • Current vitals are within acceptable ranges for their condition
-      • Blood pressure: ${patient.vitalSigns?.bloodPressure}
-      • Heart rate: ${patient.vitalSigns?.heartRate}
-      • Weight: ${patient.vitalSigns?.weight}
-      
-      Consider ordering follow-up tests based on ${patient.condition} protocols. I can help interpret results and suggest appropriate monitoring intervals.`;
-    }
-
-    // Treatment planning
-    if (
-      lowerMessage.includes("treatment") ||
-      lowerMessage.includes("plan") ||
-      lowerMessage.includes("therapy")
-    ) {
-      return `Treatment planning for ${patient.name}:
-      • Current condition: ${patient.condition} (${patient.status})
-      • Age considerations: ${patient.age} years old
-      • Current treatment appears effective based on ${patient.status} status
-      
-      I recommend continuing current care protocols with regular monitoring. Would you like me to suggest modifications to the treatment plan or discuss alternative approaches?`;
-    }
-
-    // Default response
-    return `I'm here to help with ${patient.name}'s medical care. I can assist with:
-    • Medical history review and analysis
-    • Medication management and interactions
-    • Diagnostic recommendations and test interpretation
-    • Treatment planning and modifications
-    • Clinical decision support
-    
-    Patient summary: ${patient.age}-year-old ${patient.gender} with ${patient.condition}, currently ${patient.status}. What specific medical guidance do you need?`;
   };
 
   const formatTime = (timestamp) => {
