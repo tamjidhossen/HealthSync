@@ -30,7 +30,7 @@ CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
 
 # Retrieval configuration
-RETRIEVAL_K = 10
+RETRIEVAL_K = 20
 
 # Data paths
 DATA_DIR = "Data"
@@ -56,9 +56,9 @@ Based on the following patient medical records and context: {{context}}
 Question from Doctor: {{question}}
 
 Instructions:
+- Response in markdown format only, make it look good
 - You are assisting a licensed medical professional
-- Provide medical information based only on the patient records in the context
-- Present information in a clear, clinical format suitable for healthcare professionals
+- Provide medical information based on the patient records in the context
 - Include relevant dates, test results, medications, and medical history when available
 - If the context doesn't contain enough information to answer the question, say "The available patient records do not contain sufficient information to answer that question."
 - Focus on factual medical data from the patient's records
