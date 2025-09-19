@@ -105,11 +105,11 @@ export function AIAssistantPanel() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="relative h-[calc(100vh-8rem)] flex flex-col">
       {/* Chat Messages Area */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto space-y-4 p-6"
+        className="flex-1 overflow-y-auto space-y-4 p-6 pb-24"
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "#53a2e3 transparent",
@@ -207,7 +207,7 @@ export function AIAssistantPanel() {
       </div>
 
       {/* Fixed Input Area at Bottom - Always sticks to bottom */}
-      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">
+      <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 shadow-lg">
         <form onSubmit={handleSendMessage}>
           <div className="relative bg-[#e1eeff] dark:bg-gray-800 rounded-xl border border-blue-200 dark:border-gray-600 focus-within:border-[#53a2e3] transition-colors">
             <input
