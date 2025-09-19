@@ -69,7 +69,39 @@ Follow these steps to set up and run the project on your local machine.
 -   **Description**: Predicts a disease based on a list of symptoms.
 -   **Request Body**:
     ```json
-    {
-      "symptoms": "depression , insomnia, leg pain , weakness , caugh"
-    }
+    
+    
+    
+  {
+    "symptoms": "depression , insomnia, leg pain , weakness , caugh"
+  }
+    
+  {
+    "symptoms": "anxiety and nervousness, insomnia, dizziness, shortness of breath, sharp chest pain"
+  },
+
+  {
+    "symptoms": "nausea, diarrhea, vomiting, headache, lower abdominal pain"
+  },
+
+  {
+    "symptoms": "sore throat, cough, hoarse voice, nasal congestion, throat swelling"
+  },
+
+  {
+    "symptoms": "back pain, neck pain, shoulder pain, low back pain, leg pain"
+  },
+
+  {
+    "symptoms": "shoulder weakness, arm weakness, leg weakness, hand or finger weakness, muscle weakness"
+  },
+
+  {
+    "symptoms": "ear pain, ringing in ear, fluid in ear, itchy ear(s), abnormal size or shape of ear"
+  },
+
+  {
+    "symptoms": "fever, chills, fatigue, feeling ill, ache all over"
+  }
+
     ```
