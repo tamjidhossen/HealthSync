@@ -36,9 +36,10 @@ class ModelEnsemble:
         voting_pred = self.voting.predict(input_df)[0]
 
         # Decode predictions
-        return {
-            "rf_prediction": self.encoder.inverse_transform([rf_pred])[0],
-            "nb_prediction": self.encoder.inverse_transform([nb_pred])[0],
-            "svm_prediction": self.encoder.inverse_transform([svm_pred])[0],
-            "voting_prediction": self.encoder.inverse_transform([voting_pred])[0],
-        }
+        from .schemas import PredictResponse
+        return PredictResponse(
+            rf_prediction=self.encoder.inverse_transform([rf_pred])[0],
+            nb_prediction=self.encoder.inverse_transform([nb_pred])[0],
+            svm_prediction=self.encoder.inverse_transform([svm_pred])[0],
+            voting_prediction=self.encoder.inverse_transform([voting_pred])[0],
+        )

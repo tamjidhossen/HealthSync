@@ -1,0 +1,43 @@
+# Example request for testing the chatbot
+{
+  "message": "I'm feeling chest pain and have difficulty breathing",
+  "patient_history": {
+    "previous_visits": [10],
+    "medical_conditions": ["hypertension"],
+    "allergies": [],
+    "medications": ["lisinopril"]
+  },
+  "patient_location": {
+    "division": "Rajshahi",
+    "district": "Chapai Nawabganj",
+    "upazila": "Chapai Nababganj Sadar"
+  },
+  "doctors_list": [
+    {
+      "id": 10,
+      "name": "Dr. Shafiqul Alam",
+      "post": "Jr. Consultant (Cardiology)",
+      "division": "Rajshahi",
+      "district": "Chapai Nawabganj",
+      "upazila": "Chapai Nababganj Sadar",
+      "facility": "Chapai Nababganj District Hospital",
+      "discipline": "Cardiology",
+      "contact_no": "1711223344",
+      "address": "Chapainawabganj Sadar Hospital",
+      "degree": "MBBS/1990,MD(Cardiology)/1999"
+    },
+    {
+      "id": 7,
+      "name": "Dr. Saiful Islam",
+      "post": "Jr. Consultant (Medicine)",
+      "division": "Rajshahi",
+      "district": "Chapai Nawabganj",
+      "upazila": "Chapai Nababganj Sadar",
+      "facility": "Chapai Nababganj District Hospital",
+      "discipline": "Medicine",
+      "contact_no": "1788445566",
+      "address": "Adhunik Sadar Hospital, Chapainawabganj",
+      "degree": "MBBS/1995,MD(Medicine)/2004"
+    }
+  ]
+}
