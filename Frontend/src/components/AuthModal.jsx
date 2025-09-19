@@ -8,21 +8,68 @@ import {
   Lock,
   AlertCircle,
   CheckCircle,
+  User,
+  Phone,
+  Calendar,
+  Heart,
+  UserPlus,
+  Stethoscope,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../hooks/useAuth";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 const AuthModal = ({ isOpen, onClose, mode, onModeChange, onSuccess }) => {
   const { login, register, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [userType, setUserType] = useState("patient");
   const [formData, setFormData] = useState({
+    // Common fields
+    fullName: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
+
+    // Patient-specific fields
+    dateOfBirth: "",
+    gender: "",
+    bloodGroup: "",
+
+    // Doctor-specific fields
+    licenseNumber: "",
   });
   const [localError, setLocalError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+
+  const resetForm = () => {
+    setFormData({
+      // Common fields
+      fullName: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+
+      // Patient-specific fields
+      dateOfBirth: "",
+      gender: "",
+      bloodGroup: "",
+
+      // Doctor-specific fields
+      licenseNumber: "",
+    });
+    setUserType("patient");
+    setLocalError(null);
+    setSuccessMessage(null);
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -47,15 +94,34 @@ const AuthModal = ({ isOpen, onClose, mode, onModeChange, onSuccess }) => {
           return;
         }
 
-        const result = await register({
-          email: formData.email,
-          password: formData.password,
-        });
+        // Prepare registration data based on user type
+        let registrationData;
+        if (userType === "patient") {
+          registrationData = {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            password: formData.password,
+            dateOfBirth: formData.dateOfBirth,
+            gender: formData.gender,
+            bloodGroup: formData.bloodGroup,
+          };
+        } else {
+          registrationData = {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            password: formData.password,
+            licenseNumber: formData.licenseNumber,
+          };
+        }
+
+        const result = await register(registrationData, userType);
 
         if (result.success) {
           setSuccessMessage(result.message);
           toast.success(result.message);
-          setFormData({ email: "", password: "", confirmPassword: "" });
+          resetForm();
           setTimeout(() => {
             onModeChange("login");
             setSuccessMessage(null);
@@ -71,7 +137,7 @@ const AuthModal = ({ isOpen, onClose, mode, onModeChange, onSuccess }) => {
         });
 
         if (result.success) {
-          setFormData({ email: "", password: "", confirmPassword: "" });
+          resetForm();
           toast.success("Login successful!");
           if (onSuccess) {
             onSuccess(result.user);
@@ -150,6 +216,57 @@ const AuthModal = ({ isOpen, onClose, mode, onModeChange, onSuccess }) => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* User Type Selection for Registration */}
+            {mode === "register" && (
+              <div className="space-y-2">
+                <label className="text-sm mb-5 font-medium text-gray-300">
+                  Register as
+                </label>
+                <Select value={userType} onValueChange={setUserType}>
+                  <SelectTrigger className="mt-2 w-full bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-3 text-white focus:border-primary focus:bg-gray-800/70">
+                    <SelectValue placeholder="Select user type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border border-gray-700">
+                    <SelectItem
+                      value="patient"
+                      className="text-white hover:bg-gray-700"
+                    >
+                      <div className="flex items-center gap-2">
+                        <UserPlus className="w-4 h-4" />
+                        Patient
+                      </div>
+                    </SelectItem>
+                    <SelectItem
+                      value="doctor"
+                      className="text-white hover:bg-gray-700"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Stethoscope className="w-4 h-4" />
+                        Doctor
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Full Name - Required for registration */}
+            {mode === "register" && (
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Full Name"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-12 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:bg-gray-800/70 transition-all duration-200"
+                  required
+                />
+              </div>
+            )}
+
+            {/* Email */}
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input
@@ -163,6 +280,23 @@ const AuthModal = ({ isOpen, onClose, mode, onModeChange, onSuccess }) => {
               />
             </div>
 
+            {/* Phone - Required for registration */}
+            {mode === "register" && (
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="Phone Number"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-12 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:bg-gray-800/70 transition-all duration-200"
+                  required
+                />
+              </div>
+            )}
+
+            {/* Password */}
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
               <input
@@ -194,6 +328,7 @@ const AuthModal = ({ isOpen, onClose, mode, onModeChange, onSuccess }) => {
               </div>
             )}
 
+            {/* Confirm Password */}
             {mode === "register" && (
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
@@ -220,6 +355,146 @@ const AuthModal = ({ isOpen, onClose, mode, onModeChange, onSuccess }) => {
               </div>
             )}
 
+            {/* Patient-specific fields */}
+            {mode === "register" && userType === "patient" && (
+              <>
+                {/* Date of Birth */}
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    placeholder="Date of Birth"
+                    value={formData.dateOfBirth}
+                    onChange={handleInputChange}
+                    className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-12 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:bg-gray-800/70 transition-all duration-200"
+                    required
+                  />
+                </div>
+
+                {/* Gender */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">
+                    Gender
+                  </label>
+                  <Select
+                    value={formData.gender}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, gender: value })
+                    }
+                  >
+                    <SelectTrigger className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-3 text-white focus:border-primary focus:bg-gray-800/70">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border border-gray-700">
+                      <SelectItem
+                        value="male"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        Male
+                      </SelectItem>
+                      <SelectItem
+                        value="female"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        Female
+                      </SelectItem>
+                      <SelectItem
+                        value="other"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        Other
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Blood Group */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">
+                    Blood Group
+                  </label>
+                  <Select
+                    value={formData.bloodGroup}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, bloodGroup: value })
+                    }
+                  >
+                    <SelectTrigger className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-3 text-white focus:border-primary focus:bg-gray-800/70">
+                      <SelectValue placeholder="Select blood group" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border border-gray-700">
+                      <SelectItem
+                        value="A+"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        A+
+                      </SelectItem>
+                      <SelectItem
+                        value="A-"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        A-
+                      </SelectItem>
+                      <SelectItem
+                        value="B+"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        B+
+                      </SelectItem>
+                      <SelectItem
+                        value="B-"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        B-
+                      </SelectItem>
+                      <SelectItem
+                        value="AB+"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        AB+
+                      </SelectItem>
+                      <SelectItem
+                        value="AB-"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        AB-
+                      </SelectItem>
+                      <SelectItem
+                        value="O+"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        O+
+                      </SelectItem>
+                      <SelectItem
+                        value="O-"
+                        className="text-white hover:bg-gray-700"
+                      >
+                        O-
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+
+            {/* Doctor-specific fields */}
+            {mode === "register" && userType === "doctor" && (
+              <div className="relative">
+                <Heart className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="text"
+                  name="licenseNumber"
+                  placeholder="Medical License Number"
+                  value={formData.licenseNumber}
+                  onChange={handleInputChange}
+                  className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-12 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:bg-gray-800/70 transition-all duration-200"
+                  required
+                />
+              </div>
+            )}
+
+            {/* Login specific - Remember me */}
             {mode === "login" && (
               <div className="flex items-center justify-between">
                 <label className="flex items-center">
@@ -270,13 +545,7 @@ const AuthModal = ({ isOpen, onClose, mode, onModeChange, onSuccess }) => {
               <button
                 onClick={() => {
                   // Clear form and errors when switching modes
-                  setFormData({
-                    email: "",
-                    password: "",
-                    confirmPassword: "",
-                  });
-                  setLocalError(null);
-                  setSuccessMessage(null);
+                  resetForm();
                   onModeChange(mode === "login" ? "register" : "login");
                 }}
                 className="text-primary hover:text-primary/80 font-medium transition-colors"

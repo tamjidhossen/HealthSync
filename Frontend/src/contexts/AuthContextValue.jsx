@@ -54,17 +54,41 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (userData) => {
+  const register = async (userData, userType = "patient") => {
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Mock successful registration - in real app, role would be determined during registration
+      // Prepare API endpoint based on user type
+      const endpoint =
+        userType === "patient"
+          ? "http://localhost:5000/api/v1/auth/register/patient"
+          : "http://localhost:5000/api/v1/auth/register/doctor";
+
+      // In a real app, you would make an actual API call like:
+      // const response = await fetch(endpoint, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(userData),
+      // });
+      // const result = await response.json();
+
+      // Mock successful registration
       const mockUser = {
         id: Date.now(),
+        fullName: userData.fullName,
         email: userData.email,
-        name: userData.name || "User",
-        role: userData.role || "patient", // Default to patient if no role specified
+        phone: userData.phone,
+        role: userType,
+        // Add user type specific data
+        ...(userType === "patient" && {
+          dateOfBirth: userData.dateOfBirth,
+          gender: userData.gender,
+          bloodGroup: userData.bloodGroup,
+        }),
+        ...(userType === "doctor" && {
+          licenseNumber: userData.licenseNumber,
+        }),
       };
 
       localStorage.setItem("authToken", "mock-token");
@@ -73,11 +97,17 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setUser(mockUser);
 
-      return { success: true, message: "Registration successful!" };
+      return {
+        success: true,
+        message: `${
+          userType === "patient" ? "Patient" : "Doctor"
+        } registration successful!`,
+        user: mockUser,
+      };
     } catch (error) {
       return {
         success: false,
-        message: error.message || "Registration failed",
+        error: error.message || "Registration failed",
       };
     }
   };
