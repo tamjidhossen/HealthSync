@@ -1,0 +1,37 @@
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.joblib
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Project specific
+# -------------------------
+# Ignore trained ML models
+ML/saved_models
+
+# Ignore datasets
+ML/data/
+*.csv
+
+# Ignore environment/config files
+*.env
