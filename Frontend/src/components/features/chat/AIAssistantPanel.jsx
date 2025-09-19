@@ -1,57 +1,87 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../ui/card";
-import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
-import { Badge } from "../../ui/badge";
-import {
-  MessageCircle,
-  Send,
-  Bot,
-  User,
-  Lightbulb,
-  Heart,
-  AlertTriangle,
-} from "lucide-react";
-import { useState } from "react";
-import { patientData } from "../../../data/patient-data";
+import React, { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Send, Bot, User, AlertCircle } from "lucide-react";
 
 export function AIAssistantPanel() {
-  const [messages, setMessages] = useState(
-    patientData.chatHistory[0]?.messages || []
-  );
-  const [newMessage, setNewMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      type: "bot",
+      content:
+        "Hello! I'm your HealthSync AI assistant. How can I help you with your health today?",
+      timestamp: new Date(Date.now() - 5 * 60000),
+    },
+  ]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+  // Auto scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Dummy loading message for shimmer effect
+  const loadingMessage = {
+    id: "loading",
+    type: "bot",
+    content: "I'm analyzing your health data...",
+    timestamp: new Date(),
+    isLoading: true,
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!inputMessage.trim() || isLoading) return;
 
     const userMessage = {
-      id: `MSG${Date.now()}`,
-      sender: "patient",
-      message: newMessage,
-      timestamp: new Date().toISOString(),
+      id: Date.now(),
+      type: "user",
+      content: inputMessage,
+      timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setNewMessage("");
-    setIsTyping(true);
+    setInputMessage("");
+    setIsLoading(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
-      const aiResponse = {
-        id: `MSG${Date.now() + 1}`,
-        sender: "ai",
-        message: generateAIResponse(),
-        timestamp: new Date().toISOString(),
+    // Add loading message
+    setMessages((prev) => [...prev, loadingMessage]);
+
+    try {
+      // Simulate AI response delay
+      setTimeout(() => {
+        const botResponse = {
+          id: Date.now() + 1,
+          type: "bot",
+          content: generateAIResponse(),
+          timestamp: new Date(),
+          responseTime: (Math.random() * 2 + 1).toFixed(1),
+        };
+
+        setMessages((prev) =>
+          prev.filter((msg) => msg.id !== "loading").concat(botResponse)
+        );
+        setIsLoading(false);
+      }, 1500);
+    } catch (error) {
+      console.error("Chat error:", error);
+
+      const errorResponse = {
+        id: Date.now() + 1,
+        type: "bot",
+        content:
+          "I'm sorry, I encountered an error. Please try again or contact your healthcare provider.",
+        timestamp: new Date(),
+        isError: true,
       };
-      setMessages((prev) => [...prev, aiResponse]);
-      setIsTyping(false);
-    }, 1500);
+
+      setMessages((prev) =>
+        prev.filter((msg) => msg.id !== "loading").concat(errorResponse)
+      );
+      setIsLoading(false);
+    }
   };
 
   const generateAIResponse = () => {
@@ -59,208 +89,144 @@ export function AIAssistantPanel() {
       "I understand your concern. Based on your medical history, I recommend discussing this with your healthcare provider.",
       "That's a good question. Your current medications might be related to this symptom. Let me check your records.",
       "Thank you for sharing this information. It's important to monitor these changes. I suggest scheduling an appointment.",
-      "Based on your health profile, this could be normal, but it's always best to consult with Dr. Ahmed Rahman.",
-      "I see you're taking Amlodipine, which can sometimes cause these effects. Please mention this at your next appointment.",
+      "Based on your health profile, this could be normal, but it's always best to consult with your doctor.",
+      "I see you're taking medication that can sometimes cause these effects. Please mention this at your next appointment.",
+      "Your vital signs look stable. However, it's important to continue monitoring and follow your treatment plan.",
+      "This symptom could be related to your current condition. I recommend keeping a health diary to track patterns.",
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   };
 
-  const quickQuestions = [
-    "What are the side effects of my medications?",
-    "When is my next appointment?",
-    "I'm feeling dizzy, what should I do?",
-    "Can I exercise with my current condition?",
-    "What foods should I avoid?",
-  ];
+  const formatTime = (timestamp) => {
+    return timestamp.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          AI Health Assistant
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Get personalized health insights and ask questions about your health
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chat Interface */}
-        <div className="lg:col-span-2">
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-blue-600" />
-                Chat with AI Assistant
-              </CardTitle>
-              <CardDescription>
-                Ask questions about your health, medications, or symptoms
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="flex-1 flex flex-col">
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.sender === "patient"
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
-                        message.sender === "patient"
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 text-gray-900"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        {message.sender === "patient" ? (
-                          <User className="h-4 w-4" />
-                        ) : (
-                          <Bot className="h-4 w-4" />
-                        )}
-                        <span className="text-xs opacity-75">
-                          {message.sender === "patient"
-                            ? "You"
-                            : "AI Assistant"}
-                        </span>
-                      </div>
-                      <p className="text-sm">{message.message}</p>
-                      <p className="text-xs opacity-75 mt-1">
-                        {new Date(message.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 text-gray-900 p-3 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <Bot className="h-4 w-4" />
-                        <span className="text-xs">
-                          AI Assistant is typing...
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Input */}
-              <div className="flex gap-2">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Ask about your health, medications, or symptoms..."
-                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim() || isTyping}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Quick Questions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-yellow-600" />
-                Quick Questions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {quickQuestions.map((question, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  className="w-full text-left justify-start text-sm"
-                  onClick={() => setNewMessage(question)}
-                >
-                  {question}
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Health Insights */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-red-600" />
-                Health Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {patientData.aiInsights.map((insight) => (
+    <div className="h-full flex flex-col">
+      {/* Chat Messages Area */}
+      <div
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto space-y-4 p-6"
+        style={{
+          scrollbarWidth: "thin",
+          scrollbarColor: "#53a2e3 transparent",
+        }}
+      >
+        {messages.map((message) => (
+          <motion.div
+            key={message.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`flex ${
+              message.type === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`flex max-w-[85%] sm:max-w-[80%] ${
+                message.type === "user" ? "flex-row-reverse" : "flex-row"
+              }`}
+            >
+              {/* Avatar */}
+              <div
+                className={`flex-shrink-0 ${
+                  message.type === "user" ? "ml-3" : "mr-3"
+                }`}
+              >
                 <div
-                  key={insight.id}
-                  className="p-3 border dark:border-gray-700 rounded-lg"
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    message.type === "user" ? "bg-[#53a2e3]" : "bg-[#53a2e3]"
+                  }`}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    {insight.priority === "medium" ? (
-                      <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                    ) : (
-                      <Heart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    )}
-                    <Badge
-                      variant="outline"
-                      className="text-xs dark:border-gray-600 dark:text-gray-300"
-                    >
-                      {insight.type.replace("_", " ")}
-                    </Badge>
-                  </div>
-                  <h4 className="font-medium text-sm dark:text-gray-200">
-                    {insight.title}
-                  </h4>
-                  <p className="text-xs text-muted-foreground dark:text-gray-400 mt-1">
-                    {insight.message}
-                  </p>
-                  {insight.score && (
-                    <div className="mt-2">
-                      <div className="flex justify-between text-xs dark:text-gray-300">
-                        <span>Score</span>
-                        <span>{insight.score}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
-                        <div
-                          className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full"
-                          style={{ width: `${insight.score}%` }}
-                        ></div>
-                      </div>
-                    </div>
+                  {message.type === "user" ? (
+                    <User className="w-4 h-4 text-white" />
+                  ) : (
+                    <Bot className="w-4 h-4 text-white" />
                   )}
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Emergency Notice */}
-          <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-red-800 dark:text-red-300 mb-2">
-                <AlertTriangle className="h-5 w-5" />
-                <span className="font-semibold">Emergency Notice</span>
               </div>
-              <p className="text-sm text-red-700 dark:text-red-200">
-                This AI assistant is for informational purposes only. In case of
-                medical emergencies, call emergency services or visit the
-                nearest hospital immediately.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+
+              {/* Message Content */}
+              <div
+                className={`rounded-2xl px-4 py-3 max-w-full break-words ${
+                  message.type === "user"
+                    ? "bg-[#53a2e3] text-white"
+                    : message.isError
+                    ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-700"
+                    : "bg-[#e1eeff] dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+                }`}
+              >
+                {message.isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-[#53a2e3] rounded-full animate-bounce"></div>
+                      <div
+                        className="w-2 h-2 bg-[#53a2e3] rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-[#53a2e3] rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
+                    </div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {message.content}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-start space-x-2">
+                    {message.isError && (
+                      <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                    )}
+                    <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere flex-1">
+                      {message.content}
+                    </p>
+                  </div>
+                )}
+                <div
+                  className={`text-xs mt-1 opacity-70 flex items-center justify-between ${
+                    message.type === "user"
+                      ? "text-blue-100"
+                      : message.isError
+                      ? "text-red-600 dark:text-red-400"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  <span>{formatTime(message.timestamp)}</span>
+                  {message.responseTime && !message.isError && (
+                    <span className="ml-2">({message.responseTime}s)</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Fixed Input Area at Bottom - Always sticks to bottom */}
+      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900">
+        <form onSubmit={handleSendMessage}>
+          <div className="relative bg-[#e1eeff] dark:bg-gray-800 rounded-xl border border-blue-200 dark:border-gray-600 focus-within:border-[#53a2e3] transition-colors">
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder="Ask me about your health, medications, or symptoms..."
+              disabled={isLoading}
+              className="w-full bg-transparent px-6 py-4 pr-14 text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none transition-all duration-200 disabled:opacity-50 rounded-xl"
+            />
+            <button
+              type="submit"
+              disabled={!inputMessage.trim() || isLoading}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#53a2e3] hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white p-2.5 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
+            >
+              <Send className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
