@@ -9,8 +9,9 @@ const router = express.Router();
 // Import route modules
 const authRoutes = require('./authRoutes');
 const doctorRoutes = require('./doctorRoutes');
-const patientRoutes = require('./patientRoutes'); // Phase 3B - Implemented
-// const adminRoutes = require('./adminRoutes'); // Phase 3C
+const patientRoutes = require('./patientRoutes');
+const adminRoutes = require('./adminRoutes'); // Phase 3C
+const appointmentRoutes = require('./appointmentRoutes'); // Phase 4
 
 // API Documentation route
 router.get('/docs', (req, res) => {
@@ -56,6 +57,22 @@ router.get('/docs', (req, res) => {
           'GET /patients/me/stats - Get health statistics',
         ],
       },
+      appointments: {
+        base: '/appointments',
+        routes: [
+          'POST /appointments/book - Book new appointment',
+          'GET /appointments/my-appointments - Get patient appointments',
+          'GET /appointments/doctor-appointments - Get doctor appointments',
+          'GET /appointments/available-slots/:doctorId/:date - Check availability',
+          'GET /appointments/stats - Get appointment statistics',
+          'GET /appointments/:id - Get appointment details',
+          'PATCH /appointments/:id/status - Update appointment status',
+          'PUT /appointments/:id/reschedule - Reschedule appointment',
+          'DELETE /appointments/:id - Cancel appointment',
+          'PUT /appointments/:id/notes - Add medical notes',
+          'POST /appointments/:id/feedback - Submit feedback',
+        ],
+      },
       admin: {
         base: '/admin',
         routes: [
@@ -74,6 +91,10 @@ router.get('/docs', (req, res) => {
       'File Upload Support',
       'Rate Limiting',
       'Error Handling',
+      'Appointment Management',
+      'Schedule Optimization',
+      'Medical Notes & Feedback',
+      'Multi-mode Consultations',
     ],
   });
 });
@@ -88,17 +109,18 @@ router.get('/status', (req, res) => {
   });
 });
 
-// Route mounting - Phase 2 Complete + Phase 3A (Doctor) + Phase 3B (Patient)
+// Route mounting - Phase 2 Complete + Phase 3A (Doctor) + Phase 3B (Patient) + Phase 3C (Admin) + Phase 4 (Appointments)
 router.use('/auth', authRoutes);
 router.use('/doctors', doctorRoutes);
-router.use('/patients', patientRoutes); // Phase 3B - Complete
-// router.use('/admin', adminRoutes); // Phase 3C
+router.use('/patients', patientRoutes);
+router.use('/admin', adminRoutes); // Phase 3C
+router.use('/appointments', appointmentRoutes); // Phase 4
 
 router.get('/', (req, res) => {
   res.status(200).json({
     message: 'Welcome to HealthSync API v1.0.0',
-    status: '✅ Phase 3B Complete - Patient Profile Management Ready!',
-    nextPhase: 'Phase 3C: Admin Management System',
+    status: '✅ Phase 4 Complete - Appointment Management System Ready!',
+    nextPhase: 'Phase 5: Telemedicine & Video Consultation System',
     availableRoutes: [
       'GET /api/v1/ - This welcome message',
       'GET /api/v1/docs - API documentation',
@@ -122,7 +144,18 @@ router.get('/', (req, res) => {
       '🧑‍🦰 POST /api/v1/patients/me/allergies - Add allergy',
       '🧑‍🦰 POST /api/v1/patients/me/conditions - Add chronic condition',
       '🧑‍🦰 GET /api/v1/patients/me/stats - Get health statistics',
-      '🧑‍🦰 GET /api/v1/patients/status - Patient service status'
+      '🧑‍🦰 GET /api/v1/patients/status - Patient service status',
+      '📅 POST /api/v1/appointments/book - Book new appointment',
+      '📅 GET /api/v1/appointments/my-appointments - Get patient appointments',
+      '📅 GET /api/v1/appointments/doctor-appointments - Get doctor appointments',
+      '📅 GET /api/v1/appointments/available-slots/:doctorId/:date - Check availability',
+      '📅 GET /api/v1/appointments/:id - Get appointment details',
+      '📅 PATCH /api/v1/appointments/:id/status - Update appointment status',
+      '📅 PUT /api/v1/appointments/:id/reschedule - Reschedule appointment',
+      '📅 DELETE /api/v1/appointments/:id - Cancel appointment',
+      '📅 PUT /api/v1/appointments/:id/notes - Add medical notes',
+      '📅 POST /api/v1/appointments/:id/feedback - Submit feedback',
+      '📅 GET /api/v1/appointments/stats - Appointment analytics'
     ],
   });
 });

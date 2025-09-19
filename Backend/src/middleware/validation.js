@@ -3,7 +3,7 @@
  * Validates request data for authentication endpoints
  */
 
-const { body, validationResult } = require('express-validator');
+const { body, query, validationResult } = require('express-validator');
 const { AppError } = require('./errorHandler');
 
 /**
@@ -771,6 +771,452 @@ const validatePatientPreferences = [
   handleValidationErrors
 ];
 
+/**
+ * Validation rules for admin profile update
+ */
+const validateAdminProfileUpdate = [
+  body('fullName')
+    .optional()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Full name must be between 2 and 100 characters')
+    .matches(/^[a-zA-Z\s.'-]+$/)
+    .withMessage('Full name can only contain letters, spaces, dots, hyphens, and apostrophes'),
+
+  body('phone')
+    .optional()
+    .matches(/^(\+88)?01[3-9]\d{8}$/)
+    .withMessage('Please provide a valid Bangladesh phone number'),
+
+  body('department')
+    .optional()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Department must be between 2 and 100 characters'),
+
+  body('responsibilities')
+    .optional()
+    .isArray()
+    .withMessage('Responsibilities must be an array'),
+
+  body('preferences.notifications.email')
+    .optional()
+    .isBoolean()
+    .withMessage('Email notification preference must be true or false'),
+
+  body('preferences.notifications.browser')
+    .optional()
+    .isBoolean()
+    .withMessage('Browser notification preference must be true or false'),
+
+  body('preferences.dashboard.defaultView')
+    .optional()
+    .isIn(['overview', 'pending-verifications', 'statistics', 'recent-activity'])
+    .withMessage('Default view must be one of: overview, pending-verifications, statistics, recent-activity'),
+
+  body('preferences.timezone')
+    .optional()
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Timezone must be a valid timezone string'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for doctor verification
+ */
+const validateDoctorVerification = [
+  body('action')
+    .notEmpty()
+    .withMessage('Action is required')
+    .isIn(['approve', 'reject'])
+    .withMessage('Action must be either approve or reject'),
+
+  body('reason')
+    .optional()
+    .isLength({ min: 5, max: 500 })
+    .withMessage('Reason must be between 5 and 500 characters'),
+
+  body('notes')
+    .optional()
+    .isLength({ max: 1000 })
+    .withMessage('Notes cannot exceed 1000 characters'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for user suspension
+ */
+const validateUserSuspension = [
+  body('userType')
+    .notEmpty()
+    .withMessage('User type is required')
+    .isIn(['doctor', 'patient'])
+    .withMessage('User type must be either doctor or patient'),
+
+  body('action')
+    .notEmpty()
+    .withMessage('Action is required')
+    .isIn(['suspend', 'unsuspend'])
+    .withMessage('Action must be either suspend or unsuspend'),
+
+  body('reason')
+    .optional()
+    .isLength({ min: 5, max: 500 })
+    .withMessage('Reason must be between 5 and 500 characters'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for admin permission updates
+ */
+const validatePermissionUpdate = [
+  body('role')
+    .optional()
+    .isIn(['super-admin', 'admin', 'moderator'])
+    .withMessage('Role must be one of: super-admin, admin, moderator'),
+
+  body('permissions')
+    .optional()
+    .isArray()
+    .withMessage('Permissions must be an array'),
+
+  body('permissions.*.resource')
+    .optional()
+    .isIn(['doctors', 'patients', 'appointments', 'prescriptions', 'medical-records', 'system', 'reports'])
+    .withMessage('Invalid permission resource'),
+
+  body('permissions.*.actions')
+    .optional()
+    .isArray()
+    .withMessage('Permission actions must be an array'),
+
+  body('permissions.*.actions.*')
+    .optional()
+    .isIn(['create', 'read', 'update', 'delete', 'approve', 'reject'])
+    .withMessage('Invalid permission action'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for data export requests
+ */
+const validateDataExport = [
+  body('dataType')
+    .notEmpty()
+    .withMessage('Data type is required')
+    .isIn(['doctors', 'patients', 'admins', 'activity-logs'])
+    .withMessage('Data type must be one of: doctors, patients, admins, activity-logs'),
+
+  body('format')
+    .optional()
+    .isIn(['json', 'csv', 'xlsx'])
+    .withMessage('Format must be one of: json, csv, xlsx'),
+
+  body('startDate')
+    .optional()
+    .isISO8601()
+    .toDate()
+    .withMessage('Start date must be a valid ISO 8601 date'),
+
+  body('endDate')
+    .optional()
+    .isISO8601()
+    .toDate()
+    .withMessage('End date must be a valid ISO 8601 date')
+    .custom((endDate, { req }) => {
+      if (req.body.startDate && endDate < req.body.startDate) {
+        throw new Error('End date must be after start date');
+      }
+      return true;
+    }),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for admin search queries
+ */
+const validateAdminSearch = [
+  body('query')
+    .optional()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Search query must be between 1 and 100 characters'),
+
+  body('filters.role')
+    .optional()
+    .isIn(['super-admin', 'admin', 'moderator'])
+    .withMessage('Role filter must be valid'),
+
+  body('filters.status')
+    .optional()
+    .isIn(['active', 'inactive'])
+    .withMessage('Status filter must be active or inactive'),
+
+  body('filters.department')
+    .optional()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Department filter must be valid'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for system maintenance actions
+ */
+const validateSystemMaintenance = [
+  body('action')
+    .notEmpty()
+    .withMessage('Maintenance action is required')
+    .isIn(['backup', 'cleanup', 'optimization', 'security-scan'])
+    .withMessage('Invalid maintenance action'),
+
+  body('description')
+    .notEmpty()
+    .withMessage('Action description is required')
+    .isLength({ min: 10, max: 500 })
+    .withMessage('Description must be between 10 and 500 characters'),
+
+  body('scheduledAt')
+    .optional()
+    .isISO8601()
+    .toDate()
+    .withMessage('Scheduled time must be a valid date'),
+
+  body('estimatedDuration')
+    .optional()
+    .isInt({ min: 1, max: 1440 })
+    .withMessage('Estimated duration must be between 1 and 1440 minutes'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for appointment booking
+ */
+const validateAppointmentBooking = [
+  body('doctorId')
+    .notEmpty()
+    .withMessage('Doctor ID is required')
+    .isMongoId()
+    .withMessage('Invalid doctor ID format'),
+
+  body('appointmentDate')
+    .notEmpty()
+    .withMessage('Appointment date is required')
+    .isISO8601()
+    .withMessage('Invalid date format')
+    .custom((value) => {
+      const appointmentDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (appointmentDate < today) {
+        throw new Error('Appointment date cannot be in the past');
+      }
+
+      // Check if appointment is not more than 3 months in the future
+      const maxFutureDate = new Date();
+      maxFutureDate.setMonth(maxFutureDate.getMonth() + 3);
+
+      if (appointmentDate > maxFutureDate) {
+        throw new Error('Appointments can only be booked up to 3 months in advance');
+      }
+
+      return true;
+    }),
+
+  body('timeSlot')
+    .notEmpty()
+    .withMessage('Time slot is required')
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage('Invalid time format. Use HH:MM format'),
+
+  body('chiefComplaint')
+    .notEmpty()
+    .withMessage('Chief complaint is required')
+    .isLength({ min: 10, max: 500 })
+    .withMessage('Chief complaint must be between 10 and 500 characters'),
+
+  body('symptoms')
+    .optional()
+    .isArray()
+    .withMessage('Symptoms must be an array'),
+
+  body('symptoms.*')
+    .optional()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Each symptom must be between 2 and 100 characters'),
+
+  body('appointmentType')
+    .optional()
+    .isIn(['consultation', 'follow-up', 'checkup', 'emergency', 'procedure'])
+    .withMessage('Invalid appointment type'),
+
+  body('mode')
+    .optional()
+    .isIn(['in-person', 'telemedicine', 'video-call', 'phone-call'])
+    .withMessage('Invalid appointment mode'),
+
+  body('priority')
+    .optional()
+    .isIn(['low', 'medium', 'high', 'urgent'])
+    .withMessage('Invalid priority level'),
+
+  body('isEmergency')
+    .optional()
+    .isBoolean()
+    .withMessage('isEmergency must be a boolean value'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for appointment status updates
+ */
+const validateAppointmentStatus = [
+  body('status')
+    .notEmpty()
+    .withMessage('Status is required')
+    .isIn(['requested', 'confirmed', 'completed', 'cancelled', 'no-show', 'rescheduled'])
+    .withMessage('Invalid appointment status'),
+
+  body('reason')
+    .optional()
+    .isLength({ min: 5, max: 500 })
+    .withMessage('Reason must be between 5 and 500 characters'),
+
+  body('doctorNotes')
+    .optional()
+    .isLength({ min: 5, max: 2000 })
+    .withMessage('Doctor notes must be between 5 and 2000 characters'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for appointment rescheduling
+ */
+const validateAppointmentReschedule = [
+  body('appointmentDate')
+    .notEmpty()
+    .withMessage('New appointment date is required')
+    .isISO8601()
+    .withMessage('Invalid date format')
+    .custom((value) => {
+      const newDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (newDate < today) {
+        throw new Error('New appointment date cannot be in the past');
+      }
+
+      return true;
+    }),
+
+  body('timeSlot')
+    .notEmpty()
+    .withMessage('New time slot is required')
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .withMessage('Invalid time format. Use HH:MM format'),
+
+  body('reason')
+    .optional()
+    .isLength({ min: 5, max: 500 })
+    .withMessage('Reason must be between 5 and 500 characters'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for medical notes
+ */
+const validateMedicalNotes = [
+  body('doctorNotes')
+    .optional()
+    .isLength({ min: 5, max: 2000 })
+    .withMessage('Doctor notes must be between 5 and 2000 characters'),
+
+  body('patientNotes')
+    .optional()
+    .isLength({ min: 5, max: 1000 })
+    .withMessage('Patient notes must be between 5 and 1000 characters'),
+
+  body('treatmentPlan')
+    .optional()
+    .isLength({ min: 10, max: 1500 })
+    .withMessage('Treatment plan must be between 10 and 1500 characters'),
+
+  body('followUpInstructions')
+    .optional()
+    .isLength({ min: 5, max: 1000 })
+    .withMessage('Follow-up instructions must be between 5 and 1000 characters'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for appointment feedback
+ */
+const validateAppointmentFeedback = [
+  body('rating')
+    .notEmpty()
+    .withMessage('Rating is required')
+    .isInt({ min: 1, max: 5 })
+    .withMessage('Rating must be between 1 and 5'),
+
+  body('review')
+    .optional()
+    .isLength({ min: 10, max: 1000 })
+    .withMessage('Review must be between 10 and 1000 characters'),
+
+  body('serviceRating')
+    .optional()
+    .isInt({ min: 1, max: 5 })
+    .withMessage('Service rating must be between 1 and 5'),
+
+  body('recommendToOthers')
+    .optional()
+    .isBoolean()
+    .withMessage('Recommend to others must be a boolean value'),
+
+  handleValidationErrors
+];
+
+/**
+ * Validation rules for appointment query parameters
+ */
+const validateAppointmentQuery = [
+  query('status')
+    .optional()
+    .isIn(['requested', 'confirmed', 'completed', 'cancelled', 'no-show', 'rescheduled'])
+    .withMessage('Invalid status filter'),
+
+  query('upcoming')
+    .optional()
+    .isIn(['true', 'false'])
+    .withMessage('Upcoming must be true or false'),
+
+  query('date')
+    .optional()
+    .isISO8601()
+    .withMessage('Invalid date format'),
+
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer'),
+
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100'),
+
+  handleValidationErrors
+];
+
 module.exports = {
   validateDoctorRegistration,
   validatePatientRegistration,
@@ -796,5 +1242,22 @@ module.exports = {
   validateHealthMetrics,
   validateAllergyInfo,
   validateChronicCondition,
-  validatePatientPreferences
+  validatePatientPreferences,
+
+  // Admin validations
+  validateAdminProfileUpdate,
+  validateDoctorVerification,
+  validateUserSuspension,
+  validatePermissionUpdate,
+  validateDataExport,
+  validateAdminSearch,
+  validateSystemMaintenance,
+
+  // Appointment validations
+  validateAppointmentBooking,
+  validateAppointmentStatus,
+  validateAppointmentReschedule,
+  validateMedicalNotes,
+  validateAppointmentFeedback,
+  validateAppointmentQuery
 };

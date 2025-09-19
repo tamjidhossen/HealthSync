@@ -1,0 +1,288 @@
+{
+    "info": {
+        "name": "HealthSync Appointment Endpoints - Demo Data",
+        "description": "Complete demo data for testing appointment management system",
+        "version": "1.0.0"
+    },
+    "baseUrl": "http://localhost:5000/api/v1",
+    "auth": {
+        "note": "First register/login to get JWT token, then add to Authorization header: Bearer <token>"
+    },
+    "endpoints": {
+        "1. Book New Appointment": {
+            "method": "POST",
+            "url": "{{baseUrl}}/appointments/book",
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{patientToken}}"
+            },
+            "body": {
+                "doctorId": "DOC-123456",
+                "appointmentDate": "2025-09-25",
+                "timeSlot": "10:00",
+                "appointmentType": "consultation",
+                "consultationMode": "in-person",
+                "reason": "Regular check-up and consultation for ongoing health concerns",
+                "symptoms": [
+                    "fatigue",
+                    "headache",
+                    "difficulty sleeping"
+                ],
+                "priority": "medium",
+                "duration": 30,
+                "notes": "Patient has been experiencing fatigue for the past 2 weeks"
+            },
+            "alternativeBody": {
+                "doctorId": "DOC-123456",
+                "appointmentDate": "2025-09-26",
+                "timeSlot": "14:30",
+                "appointmentType": "follow-up",
+                "consultationMode": "telemedicine",
+                "reason": "Follow-up appointment for blood test results",
+                "symptoms": [
+                    "chest pain",
+                    "shortness of breath"
+                ],
+                "priority": "high",
+                "duration": 45,
+                "notes": "Urgent follow-up needed for cardiac symptoms",
+                "telemedicine": {
+                    "platform": "zoom",
+                    "meetingUrl": "https://zoom.us/j/1234567890",
+                    "meetingId": "123-456-7890",
+                    "passcode": "health123"
+                }
+            }
+        },
+        "2. Get Patient Appointments": {
+            "method": "GET",
+            "url": "{{baseUrl}}/appointments/my-appointments?status=confirmed&limit=10&page=1",
+            "headers": {
+                "Authorization": "Bearer {{patientToken}}"
+            },
+            "queryParams": {
+                "status": "confirmed",
+                "limit": "10",
+                "page": "1",
+                "sortBy": "appointmentDate",
+                "sortOrder": "asc"
+            }
+        },
+        "3. Get Doctor Appointments": {
+            "method": "GET",
+            "url": "{{baseUrl}}/appointments/doctor-appointments?date=2025-09-25&status=confirmed",
+            "headers": {
+                "Authorization": "Bearer {{doctorToken}}"
+            },
+            "queryParams": {
+                "date": "2025-09-25",
+                "status": "confirmed",
+                "limit": "20",
+                "page": "1"
+            }
+        },
+        "4. Check Available Slots": {
+            "method": "GET",
+            "url": "{{baseUrl}}/appointments/available-slots/DOC-123456/2025-09-25",
+            "headers": {
+                "Authorization": "Bearer {{patientToken}}"
+            },
+            "params": {
+                "doctorId": "DOC-123456",
+                "date": "2025-09-25"
+            }
+        },
+        "5. Get Appointment Details": {
+            "method": "GET",
+            "url": "{{baseUrl}}/appointments/APPT-123456",
+            "headers": {
+                "Authorization": "Bearer {{patientToken}}"
+            },
+            "params": {
+                "appointmentId": "APPT-123456"
+            }
+        },
+        "6. Update Appointment Status": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/appointments/APPT-123456/status",
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{doctorToken}}"
+            },
+            "body": {
+                "status": "confirmed",
+                "notes": "Appointment confirmed, please arrive 15 minutes early"
+            },
+            "statusOptions": [
+                "pending",
+                "confirmed",
+                "in-progress",
+                "completed",
+                "cancelled",
+                "no-show"
+            ]
+        },
+        "7. Reschedule Appointment": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/appointments/APPT-123456/reschedule",
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{patientToken}}"
+            },
+            "body": {
+                "newDate": "2025-09-27",
+                "newTimeSlot": "11:00",
+                "reason": "Schedule conflict, need to reschedule to later date"
+            }
+        },
+        "8. Cancel Appointment": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/appointments/APPT-123456",
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{patientToken}}"
+            },
+            "body": {
+                "reason": "Personal emergency, unable to attend",
+                "cancelledBy": "patient"
+            }
+        },
+        "9. Add Medical Notes": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/appointments/APPT-123456/notes",
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{doctorToken}}"
+            },
+            "body": {
+                "medicalNotes": {
+                    "chiefComplaint": "Patient complains of persistent fatigue and headaches",
+                    "historyOfPresentIllness": "Symptoms started 2 weeks ago, gradually worsening",
+                    "physicalExamination": "Vital signs stable, no acute distress observed",
+                    "diagnosis": "Possible stress-related fatigue, recommend further tests",
+                    "treatmentPlan": "Prescribed rest, stress management, follow-up in 1 week",
+                    "prescriptions": [
+                        {
+                            "medication": "Ibuprofen 400mg",
+                            "dosage": "Take twice daily after meals",
+                            "duration": "5 days"
+                        }
+                    ],
+                    "recommendations": [
+                        "Adequate sleep (7-8 hours)",
+                        "Regular exercise",
+                        "Stress management techniques"
+                    ],
+                    "followUpRequired": true,
+                    "followUpDate": "2025-10-02"
+                }
+            }
+        },
+        "10. Submit Appointment Feedback": {
+            "method": "POST",
+            "url": "{{baseUrl}}/appointments/APPT-123456/feedback",
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{patientToken}}"
+            },
+            "body": {
+                "feedback": {
+                    "rating": 5,
+                    "category": "overall-experience",
+                    "comments": "Excellent consultation, doctor was very thorough and explained everything clearly",
+                    "doctorRating": 5,
+                    "facilityRating": 4,
+                    "waitTimeRating": 4,
+                    "communicationRating": 5,
+                    "recommendDoctor": true,
+                    "suggestions": "Maybe reduce waiting time a bit"
+                }
+            },
+            "ratingScale": "1-5 (1=Poor, 2=Fair, 3=Good, 4=Very Good, 5=Excellent)",
+            "categories": [
+                "overall-experience",
+                "doctor-consultation",
+                "facility",
+                "wait-time",
+                "communication"
+            ]
+        },
+        "11. Get Appointment Statistics": {
+            "method": "GET",
+            "url": "{{baseUrl}}/appointments/stats?period=monthly&year=2025&month=9",
+            "headers": {
+                "Authorization": "Bearer {{doctorToken}}"
+            },
+            "queryParams": {
+                "period": "monthly",
+                "year": "2025",
+                "month": "9",
+                "doctorId": "DOC-123456"
+            },
+            "periodOptions": [
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly"
+            ]
+        }
+    },
+    "sampleResponses": {
+        "bookAppointment": {
+            "status": "success",
+            "message": "Appointment booked successfully",
+            "data": {
+                "appointmentId": "APPT-123456",
+                "status": "pending",
+                "appointmentDate": "2025-09-25",
+                "timeSlot": "10:00",
+                "estimatedEndTime": "10:30"
+            }
+        },
+        "availableSlots": {
+            "status": "success",
+            "data": {
+                "availableSlots": [
+                    "09:00",
+                    "09:30",
+                    "10:00",
+                    "10:30",
+                    "11:00",
+                    "14:00",
+                    "14:30",
+                    "15:00",
+                    "15:30",
+                    "16:00"
+                ],
+                "bookedSlots": [
+                    "11:30",
+                    "12:00",
+                    "16:30"
+                ],
+                "doctorAvailability": {
+                    "startTime": "09:00",
+                    "endTime": "17:00",
+                    "breakTimes": [
+                        {
+                            "start": "12:30",
+                            "end": "13:30"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "testingSteps": {
+        "step1": "First register a patient and doctor account using auth endpoints",
+        "step2": "Login as patient to get patientToken",
+        "step3": "Login as doctor to get doctorToken",
+        "step4": "Test appointment booking with patient token",
+        "step5": "Test appointment management with doctor token",
+        "step6": "Test appointment queries and statistics"
+    },
+    "requiredTokens": {
+        "patientToken": "Get from: POST /auth/login (with patient credentials)",
+        "doctorToken": "Get from: POST /auth/login (with doctor credentials)",
+        "adminToken": "Get from: POST /auth/login (with admin credentials)"
+    }
+}

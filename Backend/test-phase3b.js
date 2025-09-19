@@ -112,7 +112,7 @@ async function testPatientManagement() {
             const validation = require('./src/middleware/validation');
             const patientValidations = [
                 'validatePatientBasicUpdate',
-                'validatePatientAddress', 
+                'validatePatientAddress',
                 'validateEmergencyContact',
                 'validateInsuranceInfo',
                 'validateHealthMetrics',
@@ -120,7 +120,7 @@ async function testPatientManagement() {
                 'validateChronicCondition',
                 'validatePatientPreferences'
             ];
-            
+
             let validationCount = 0;
             patientValidations.forEach(validator => {
                 if (validation[validator]) {
@@ -129,7 +129,7 @@ async function testPatientManagement() {
                     console.log(`   ⚠️  Missing validator: ${validator}`);
                 }
             });
-            
+
             console.log(`   ✅ ${validationCount}/${patientValidations.length} patient validators found`);
         } catch (error) {
             console.log('   ❌ Validation middleware error:', error.message);
@@ -139,13 +139,13 @@ async function testPatientManagement() {
 
         // Create a test patient
         const patient = new Patient(testPatient);
-        
+
         // 5. Test Profile Completeness Calculation
         console.log('5️⃣ Profile Completeness:');
         const completeness = patientService.calculateProfileCompleteness(patient);
         console.log(`   ✅ Overall completeness: ${completeness.overall}%`);
         console.log(`   📋 Completed fields: ${completeness.completedFields}/${completeness.totalFields}`);
-        
+
         Object.entries(completeness.sections).forEach(([section, data]) => {
             console.log(`   📝 ${section}: ${data.percentage}% (${data.completed}/${data.total})`);
         });
@@ -244,7 +244,7 @@ async function testPatientManagement() {
 
         console.log('\n🏆 PHASE 3B: PATIENT PROFILE MANAGEMENT - 100% COMPLETE!');
         console.log('\n📈 NEXT PHASE: Phase 3C - Admin Management System');
-        
+
     } catch (error) {
         console.error('❌ Test failed:', error.message);
         console.error(error.stack);

@@ -190,6 +190,136 @@ const TIME_SLOTS = [
   '16:00', '16:30', '17:00', '17:30', '18:00', '18:30'
 ];
 
+// Appointment Priority Levels
+const APPOINTMENT_PRIORITY = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  URGENT: 'urgent'
+};
+
+// Appointment Types
+const APPOINTMENT_TYPES = [
+  'consultation',
+  'follow-up',
+  'checkup',
+  'emergency',
+  'procedure'
+];
+
+// Medical Consultation Durations (in minutes)
+const CONSULTATION_DURATIONS = {
+  STANDARD: 30,
+  EXTENDED: 45,
+  COMPREHENSIVE: 60,
+  BRIEF: 15
+};
+
+// Notification Types for Appointments
+const APPOINTMENT_NOTIFICATIONS = {
+  BOOKING_CONFIRMATION: 'booking-confirmation',
+  REMINDER_24H: 'reminder-24h',
+  REMINDER_2H: 'reminder-2h',
+  STATUS_UPDATE: 'status-update',
+  RESCHEDULE_CONFIRMATION: 'reschedule-confirmation',
+  CANCELLATION_CONFIRMATION: 'cancellation-confirmation'
+};
+
+// Payment Status for Appointments
+const PAYMENT_STATUS = {
+  PENDING: 'pending',
+  PAID: 'paid',
+  PARTIALLY_PAID: 'partially_paid',
+  REFUNDED: 'refunded',
+  FAILED: 'failed'
+};
+
+// Video Call Platforms
+const VIDEO_CALL_PLATFORMS = [
+  'zoom',
+  'google-meet',
+  'microsoft-teams',
+  'internal-platform'
+];
+
+// Appointment Feedback Categories
+const FEEDBACK_CATEGORIES = {
+  DOCTOR_PERFORMANCE: 'doctor-performance',
+  SERVICE_QUALITY: 'service-quality',
+  FACILITY_RATING: 'facility-rating',
+  OVERALL_EXPERIENCE: 'overall-experience'
+};
+
+// Admin Roles
+const ADMIN_ROLES = [
+  'super-admin',
+  'admin',
+  'moderator'
+];
+
+// Admin Permissions
+const ADMIN_PERMISSIONS = {
+  RESOURCES: [
+    'doctors',
+    'patients',
+    'appointments',
+    'prescriptions',
+    'medical-records',
+    'system',
+    'reports'
+  ],
+  ACTIONS: [
+    'create',
+    'read',
+    'update',
+    'delete',
+    'approve',
+    'reject'
+  ]
+};
+
+// System Actions
+const SYSTEM_ACTIONS = [
+  'user-verification',
+  'account-suspension',
+  'data-export',
+  'system-maintenance',
+  'security-alert',
+  'backup-created',
+  'settings-updated'
+];
+
+// Verification Status
+const VERIFICATION_STATUS = {
+  PENDING: 'pending',
+  VERIFIED: 'verified',
+  REJECTED: 'rejected',
+  UNDER_REVIEW: 'under-review'
+};
+
+// Admin Dashboard Views  
+const DASHBOARD_VIEWS = [
+  'overview',
+  'pending-verifications',
+  'statistics',
+  'recent-activity'
+];
+
+// Data Export Types
+const EXPORT_DATA_TYPES = [
+  'doctors',
+  'patients',
+  'admins',
+  'activity-logs'
+];
+
+// Export Formats
+const EXPORT_FORMATS = [
+  'json',
+  'csv',
+  'xlsx'
+];
+
 // ID Prefixes
 const ID_PREFIXES = {
   DOCTOR: 'DOC',
@@ -220,5 +350,19 @@ module.exports = {
   EMAIL_TEMPLATES,
   AI_CONSTANTS,
   TIME_SLOTS,
+  APPOINTMENT_PRIORITY,
+  APPOINTMENT_TYPES,
+  CONSULTATION_DURATIONS,
+  APPOINTMENT_NOTIFICATIONS,
+  PAYMENT_STATUS,
+  VIDEO_CALL_PLATFORMS,
+  FEEDBACK_CATEGORIES,
   ID_PREFIXES,
+  ADMIN_ROLES,
+  ADMIN_PERMISSIONS,
+  SYSTEM_ACTIONS,
+  VERIFICATION_STATUS,
+  DASHBOARD_VIEWS,
+  EXPORT_DATA_TYPES,
+  EXPORT_FORMATS,
 };

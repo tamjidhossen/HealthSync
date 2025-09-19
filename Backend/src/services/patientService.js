@@ -37,7 +37,7 @@ const calculateProfileCompleteness = (patient) => {
     // Contact Information (weight: 15%)
     const contactFields = ['email'];
     const addressFields = ['street', 'city', 'state', 'zipCode', 'country'];
-    
+
     contactFields.forEach(field => {
         totalFields++;
         if (patient[field]) {
@@ -349,7 +349,7 @@ const validateConditionData = (conditionData) => {
  */
 function getBMICategory(bmi) {
     if (!bmi) return null;
-    
+
     if (bmi < 18.5) return 'Underweight';
     if (bmi < 25) return 'Normal weight';
     if (bmi < 30) return 'Overweight';
@@ -376,15 +376,15 @@ const findSimilarPatients = async (patientId, conditions) => {
         },
         isActive: true
     })
-    .select('age gender medicalHistory.chronicConditions')
-    .limit(5);
+        .select('age gender medicalHistory.chronicConditions')
+        .limit(5);
 
     // Return anonymized data
     return similarPatients.map(patient => ({
         age: patient.age,
         gender: patient.gender,
         commonConditions: patient.medicalHistory.chronicConditions
-            .filter(c => conditionNames.some(name => 
+            .filter(c => conditionNames.some(name =>
                 c.condition.toLowerCase().includes(name)
             ))
             .map(c => ({ condition: c.condition, status: c.status }))
