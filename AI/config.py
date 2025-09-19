@@ -1,0 +1,56 @@
+"""Configuration settings for the University Helpdesk Chatbot"""
+
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Verify LangSmith configuration
+if os.getenv("LANGSMITH_TRACING") == "true":
+    print("LangSmith tracing enabled")
+    print(f"Project: {os.getenv('LANGSMITH_PROJECT')}")
+else:
+    print("LangSmith tracing disabled")
+
+# Model configurations
+LLM_MODEL = "gemini-2.5-flash"
+GEMINI_EMBEDDING_MODEL = "models/embedding-001"  # Gemini embedding model
+OLLAMA_EMBEDDING_MODEL = "nomic-embed-text"  # Ollama embedding model
+
+# Embedding provider selection (can be "gemini" or "ollama")
+EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "gemini")
+
+# Vector store configuration
+VECTOR_DB_PATH = "./chroma_langchain_db"
+COLLECTION_NAME = "university_helpdesk"
+
+# Text splitting configuration
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 200
+
+# Retrieval configuration
+RETRIEVAL_K = 10
+
+# Data paths
+DATA_DIR = "Data"
+QA_FILE = os.path.join(DATA_DIR, "Q&A.txt")
+STRUCTURE_FILE = os.path.join(DATA_DIR, "structure_data.json")
+
+# University information
+UNIVERSITY_NAME = "Jatiya Kabi Kazi Nazrul Islam University"
+
+# Chatbot prompt template
+CHATBOT_TEMPLATE = """
+You are a helpful university helpdesk chatbot for {university_name}.
+
+Answer the question based only on the following context: {{context}}
+
+Question: {{question}}
+
+Instructions:
+- Provide accurate and helpful information based on the context
+- If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer that question. Please contact the university directly."
+- Be friendly and professional
+- Include relevant contact information when appropriate
+""".format(university_name=UNIVERSITY_NAME)
