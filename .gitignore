@@ -30,7 +30,7 @@ Thumbs.db
 ML/saved_models
 
 # Ignore datasets
-ML/data/
+# ML/data/
 *.csv
 
 # Ignore environment/config files
