@@ -19,7 +19,7 @@ const generateUniqueId = async (prefix, length = 5) => {
   // Determine which model to check based on prefix
   let Model;
   let field;
-  
+
   switch (prefix) {
     case 'DOC':
       Model = Doctor;
@@ -39,24 +39,24 @@ const generateUniqueId = async (prefix, length = 5) => {
 
   let attempts = 0;
   const maxAttempts = 100; // Prevent infinite loops
-  
+
   while (attempts < maxAttempts) {
     attempts++;
-    
+
     // Generate random number with specified length
     const min = Math.pow(10, length - 1);
     const max = Math.pow(10, length) - 1;
     const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-    
+
     // Create the full ID
     const generatedId = `${prefix}-${randomNumber}`;
-    
+
     try {
       // Check if this ID already exists
       const query = {};
       query[field] = generatedId;
       const existing = await Model.findOne(query);
-      
+
       if (!existing) {
         return generatedId;
       }
@@ -67,7 +67,7 @@ const generateUniqueId = async (prefix, length = 5) => {
       }
     }
   }
-  
+
   throw new Error(`Failed to generate unique ID after ${maxAttempts} attempts`);
 };
 
@@ -79,19 +79,19 @@ const generateAppointmentId = async () => {
   // We'll import Appointment model when it's created
   let attempts = 0;
   const maxAttempts = 100;
-  
+
   while (attempts < maxAttempts) {
     attempts++;
-    
+
     const randomNumber = Math.floor(Math.random() * 99999) + 10000; // 5-digit number
     const generatedId = `APPT-${randomNumber}`;
-    
+
     try {
       // Try to import Appointment model
       try {
         const Appointment = require('../models/Appointment');
         const existing = await Appointment.findOne({ appointmentId: generatedId });
-        
+
         if (!existing) {
           return generatedId;
         }
@@ -105,7 +105,7 @@ const generateAppointmentId = async () => {
       }
     }
   }
-  
+
   throw new Error(`Failed to generate appointment ID after ${maxAttempts} attempts`);
 };
 
@@ -116,19 +116,19 @@ const generateAppointmentId = async () => {
 const generatePrescriptionId = async () => {
   let attempts = 0;
   const maxAttempts = 100;
-  
+
   while (attempts < maxAttempts) {
     attempts++;
-    
-    const randomNumber = Math.floor(Math.random() * 99999) + 10000; // 5-digit number
-    const generatedId = `PRES-${randomNumber}`;
-    
+
+    const randomNumber = Math.floor(Math.random() * 900000) + 100000; // 6-digit number
+    const generatedId = `PRSC-${randomNumber}`;
+
     try {
       // Try to import Prescription model
       try {
         const Prescription = require('../models/Prescription');
         const existing = await Prescription.findOne({ prescriptionId: generatedId });
-        
+
         if (!existing) {
           return generatedId;
         }
@@ -142,7 +142,7 @@ const generatePrescriptionId = async () => {
       }
     }
   }
-  
+
   throw new Error(`Failed to generate prescription ID after ${maxAttempts} attempts`);
 };
 
@@ -153,19 +153,19 @@ const generatePrescriptionId = async () => {
 const generateMedicalRecordId = async () => {
   let attempts = 0;
   const maxAttempts = 100;
-  
+
   while (attempts < maxAttempts) {
     attempts++;
-    
-    const randomNumber = Math.floor(Math.random() * 99999) + 10000; // 5-digit number
+
+    const randomNumber = Math.floor(Math.random() * 900000) + 100000; // 6-digit number
     const generatedId = `MR-${randomNumber}`;
-    
+
     try {
       // Try to import MedicalRecord model
       try {
         const MedicalRecord = require('../models/MedicalRecord');
         const existing = await MedicalRecord.findOne({ recordId: generatedId });
-        
+
         if (!existing) {
           return generatedId;
         }
@@ -179,7 +179,7 @@ const generateMedicalRecordId = async () => {
       }
     }
   }
-  
+
   throw new Error(`Failed to generate medical record ID after ${maxAttempts} attempts`);
 };
 
@@ -233,7 +233,7 @@ const generateFileId = (prefix = 'FILE') => {
  */
 const validateIdFormat = (id, expectedPrefix) => {
   if (!id || typeof id !== 'string') return false;
-  
+
   const regex = new RegExp(`^${expectedPrefix}-\\d+$`);
   return regex.test(id);
 };
@@ -245,10 +245,10 @@ const validateIdFormat = (id, expectedPrefix) => {
  */
 const extractNumberFromId = (id) => {
   if (!id || typeof id !== 'string') return null;
-  
+
   const parts = id.split('-');
   if (parts.length !== 2) return null;
-  
+
   const number = parseInt(parts[1], 10);
   return isNaN(number) ? null : number;
 };

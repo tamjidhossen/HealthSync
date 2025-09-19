@@ -42,31 +42,19 @@ const bookAppointment = catchAsync(async (req, res, next) => {
     const availabilityForDay = doctor.availability.find(a => a.day === dayOfWeek);
 
     if (!availabilityForDay) {
-        throw new Error(`Doctor is not available on ${dayOfWeek}`);
+        return next(new AppError(`Doctor is not available on ${dayOfWeek}`, 400));
     }
 
-    // Default patients allowed per slot
-    const slotCapacity = availabilityForDay.patientsCount;
-    if (appointmentCount < slotCapacity) {
-        // ✅ Can book appointment
-        const newAppointment = await Appointment.create({
-            doctor: doctor._id,
-            appointmentDate: new Date(appointmentDate),
-            timeSlot,
-            patient: req.user._id,
-        });
-        console.log("Appointment booked:", newAppointment);
-    } else {
-        res.status(400).json({
-            status: 'false',
-            message: 'Slot is full.',
-        });
-
-    }
     // Check if appointment date is in the future
     const appointmentDateTime = new Date(`${appointmentDate} ${timeSlot}`);
     if (appointmentDateTime <= new Date()) {
         return next(new AppError('Appointment date and time must be in the future', 400));
+    }
+
+    // Default patients allowed per slot
+    const slotCapacity = availabilityForDay.patientsCount || 1;
+    if (appointmentCount >= slotCapacity) {
+        return next(new AppError('Slot is full', 400));
     }
 
     // Create the appointment

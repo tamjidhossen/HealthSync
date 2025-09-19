@@ -8,6 +8,8 @@ const { catchAsync, AppError } = require('../middleware/errorHandler');
 const Admin = require('../models/Admin');
 const Doctor = require('../models/Doctor');
 const Patient = require('../models/Patient');
+const Prescription = require('../models/Prescription');
+const MedicalRecord = require('../models/MedicalRecord');
 const logger = require('../utils/logger');
 const { ADMIN_ROLES, ADMIN_PERMISSIONS } = require('../utils/constants');
 
@@ -691,6 +693,381 @@ const exportSystemData = catchAsync(async (req, res, next) => {
     });
 });
 
+/**
+ * Create new admin user (simplified process)
+ * @route POST /api/v1/admin/create-admin
+ * @access Private (Admin only)
+ */
+const createAdmin = catchAsync(async (req, res, next) => {
+    const { email, password, fullName, role = 'admin' } = req.body;
+
+    // Check if admin with this email already exists
+    const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
+    if (existingAdmin) {
+        return next(new AppError('Admin with this email already exists', 400));
+    }
+
+    // Create new admin with minimal required fields
+    const newAdmin = await Admin.create({
+        email: email.toLowerCase(),
+        passwordHash: password, // Will be hashed by pre-save middleware
+        fullName: fullName || 'Admin User',
+        role: role,
+        isEmailVerified: true, // Auto-verify for admin-created accounts
+        isActive: true,
+        permissions: [
+            {
+                resource: 'doctors',
+                actions: ['read', 'approve', 'reject']
+            },
+            {
+                resource: 'patients',
+                actions: ['read']
+            },
+            {
+                resource: 'system',
+                actions: ['read']
+            }
+        ]
+    });
+
+    // Log the creation action
+    const creatingAdmin = await Admin.findById(req.user._id);
+    // creatingAdmin.logSystemAction(
+    //     'admin-creation',
+    //     { targetType: 'admin', targetId: newAdmin._id },
+    //     `Admin account created: ${newAdmin.email}`,
+    //     { createdBy: req.user._id, role: role }
+    // );
+    await creatingAdmin.save();
+
+    // Remove sensitive data from response
+    const adminResponse = newAdmin.toObject();
+    delete adminResponse.passwordHash;
+
+    logger.info(`New admin created: ${newAdmin.email} by ${req.user.email}`, {
+        newAdminId: newAdmin._id,
+        createdBy: req.user._id,
+        ip: req.ip
+    });
+
+    res.status(201).json({
+        status: 'success',
+        message: 'Admin created successfully',
+        data: {
+            admin: {
+                _id: adminResponse._id,
+                adminId: adminResponse.adminId,
+                email: adminResponse.email,
+                fullName: adminResponse.fullName,
+                role: adminResponse.role,
+                isActive: adminResponse.isActive,
+                createdAt: adminResponse.createdAt
+            }
+        }
+    });
+});
+
+/**
+ * Search patient and get prescriptions with medical records
+ * @route GET /api/v1/admin/patient-search/:patientId
+ * @access Private (Admin only)
+ */
+const searchPatientWithPrescriptions = catchAsync(async (req, res, next) => {
+    const { patientId } = req.params;
+
+    // Find patient by ID or MongoDB ObjectId
+    const patientQuery = mongoose.isValidObjectId(patientId)
+        ? { _id: patientId }
+        : { patientId: patientId };
+
+    const patient = await Patient.findOne(patientQuery);
+    if (!patient) {
+        return next(new AppError('Patient not found', 404));
+    }
+
+    // Get latest prescriptions
+    const prescriptions = await Prescription.find({ patient: patient._id })
+        .populate('doctor', 'fullName specialization')
+        .sort({ createdAt: -1 })
+        .limit(10);
+
+    // Get medical records for this patient
+    const medicalRecords = await MedicalRecord.find({ patient: patient._id })
+        .populate('prescription', 'prescriptionId diagnosis')
+        .populate('doctor', 'fullName specialization')
+        .populate('uploadedBy', 'fullName adminId')
+        .sort({ createdAt: -1 });
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            patient: {
+                _id: patient._id,
+                patientId: patient.patientId,
+                fullName: patient.fullName,
+                email: patient.email,
+                phone: patient.phone,
+                age: patient.age,
+                bloodGroup: patient.bloodGroup
+            },
+            prescriptions: prescriptions.map(p => ({
+                _id: p._id,
+                prescriptionId: p.prescriptionId,
+                diagnosis: p.diagnosis,
+                doctor: p.doctor,
+                status: p.status,
+                medicalTests: p.medicalTests,
+                createdAt: p.createdAt,
+                medicineCount: p.medicines?.length || 0,
+                testCount: p.medicalTests?.length || 0
+            })),
+            medicalRecords: medicalRecords.length,
+            records: medicalRecords
+        }
+    });
+});
+
+/**
+ * Create medical record for prescription
+ * @route POST /api/v1/admin/medical-records
+ * @access Private (Admin only)
+ */
+const createMedicalRecord = catchAsync(async (req, res, next) => {
+    const { prescriptionId, tests, doctorNotes } = req.body;
+
+    // Find prescription and validate
+    const prescription = await Prescription.findOne({
+        $or: [
+            { prescriptionId },
+            { _id: mongoose.isValidObjectId(prescriptionId) ? prescriptionId : null }
+        ]
+    }).populate('patient doctor');
+
+    if (!prescription) {
+        return next(new AppError('Prescription not found', 404));
+    }
+
+    // Check if medical record already exists for this prescription
+    const existingRecord = await MedicalRecord.findOne({ prescription: prescription._id });
+    if (existingRecord) {
+        return next(new AppError('Medical record already exists for this prescription', 400));
+    }
+
+    // Create medical record
+    const medicalRecord = await MedicalRecord.create({
+        prescription: prescription._id,
+        patient: prescription.patient._id,
+        doctor: prescription.doctor._id,
+        tests: tests || [],
+        doctorNotes: doctorNotes || '',
+        uploadedBy: req.user._id
+    });
+
+    const populatedRecord = await MedicalRecord.findById(medicalRecord._id)
+        .populate('prescription', 'prescriptionId diagnosis')
+        .populate('patient', 'fullName patientId')
+        .populate('doctor', 'fullName specialization')
+        .populate('uploadedBy', 'fullName adminId');
+
+    logger.info(`Medical record created: ${medicalRecord.recordId} by admin: ${req.user.adminId}`);
+
+    res.status(201).json({
+        status: 'success',
+        message: 'Medical record created successfully',
+        data: {
+            medicalRecord: populatedRecord
+        }
+    });
+});
+
+/**
+ * Upload test result to medical record
+ * @route POST /api/v1/admin/medical-records/:recordId/test-result
+ * @access Private (Admin only)
+ */
+const uploadTestResult = catchAsync(async (req, res, next) => {
+    const { recordId } = req.params;
+    const { testName, testResult, testFileUrl } = req.body;
+
+    // Find medical record
+    const record = await MedicalRecord.findOne({
+        $or: [
+            { recordId },
+            { _id: mongoose.isValidObjectId(recordId) ? recordId : null }
+        ]
+    });
+
+    if (!record) {
+        return next(new AppError('Medical record not found', 404));
+    }
+
+    // Add or update test result
+    await record.addTestResult(testName, testResult, testFileUrl, req.user._id);
+
+    const updatedRecord = await MedicalRecord.findById(record._id)
+        .populate('prescription', 'prescriptionId diagnosis')
+        .populate('patient', 'fullName patientId')
+        .populate('doctor', 'fullName specialization')
+        .populate('uploadedBy', 'fullName adminId');
+
+    logger.info(`Test result uploaded: ${testName} for record ${record.recordId} by admin: ${req.user.adminId}`);
+
+    res.status(200).json({
+        status: 'success',
+        message: 'Test result uploaded successfully',
+        data: {
+            medicalRecord: updatedRecord
+        }
+    });
+});
+
+/**
+ * Get all medical records with filtering
+ * @route GET /api/v1/admin/medical-records
+ * @access Private (Admin only)
+ */
+const getAllMedicalRecords = catchAsync(async (req, res, next) => {
+    const {
+        page = 1,
+        limit = 10,
+        patientId,
+        testStatus,
+        testName,
+        sortBy = 'createdAt',
+        sortOrder = 'desc'
+    } = req.query;
+
+    const query = {};
+
+    // Filter by patient
+    if (patientId) {
+        if (mongoose.isValidObjectId(patientId)) {
+            query.patient = patientId;
+        } else {
+            // Find patient by patientId first
+            const patient = await Patient.findOne({ patientId });
+            if (patient) {
+                query.patient = patient._id;
+            } else {
+                return next(new AppError('Patient not found', 404));
+            }
+        }
+    }
+
+    // Filter by test status
+    if (testStatus) {
+        query['tests.status'] = testStatus;
+    }
+
+    // Filter by test name
+    if (testName) {
+        query['tests.testName'] = { $regex: testName, $options: 'i' };
+    }
+
+    const sortOptions = {};
+    sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+    const records = await MedicalRecord.find(query)
+        .populate('prescription', 'prescriptionId diagnosis')
+        .populate('patient', 'fullName patientId phone')
+        .populate('doctor', 'fullName specialization')
+        .populate('uploadedBy', 'fullName adminId')
+        .sort(sortOptions)
+        .limit(limit * 1)
+        .skip((page - 1) * limit);
+
+    const total = await MedicalRecord.countDocuments(query);
+
+    res.status(200).json({
+        status: 'success',
+        results: records.length,
+        pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / limit)
+        },
+        data: {
+            medicalRecords: records
+        }
+    });
+});
+
+/**
+ * Get medical record details
+ * @route GET /api/v1/admin/medical-records/:recordId
+ * @access Private (Admin only)
+ */
+const getMedicalRecordDetails = catchAsync(async (req, res, next) => {
+    const { recordId } = req.params;
+
+    const record = await MedicalRecord.findOne({
+        $or: [
+            { recordId },
+            { _id: mongoose.isValidObjectId(recordId) ? recordId : null }
+        ]
+    })
+        .populate('prescription', 'prescriptionId diagnosis medicines medicalTests')
+        .populate('patient', 'fullName patientId phone email age bloodGroup')
+        .populate('doctor', 'fullName specialization phone email')
+        .populate('uploadedBy', 'fullName adminId email')
+        .populate('tests.uploadedBy', 'fullName adminId');
+
+    if (!record) {
+        return next(new AppError('Medical record not found', 404));
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            medicalRecord: record
+        }
+    });
+});
+
+/**
+ * Update medical record
+ * @route PUT /api/v1/admin/medical-records/:recordId
+ * @access Private (Admin only)
+ */
+const updateMedicalRecord = catchAsync(async (req, res, next) => {
+    const { recordId } = req.params;
+    const { doctorNotes, aiSummary } = req.body;
+
+    const record = await MedicalRecord.findOneAndUpdate(
+        {
+            $or: [
+                { recordId },
+                { _id: mongoose.isValidObjectId(recordId) ? recordId : null }
+            ]
+        },
+        {
+            ...(doctorNotes !== undefined && { doctorNotes }),
+            ...(aiSummary !== undefined && { aiSummary })
+        },
+        { new: true, runValidators: true }
+    )
+        .populate('prescription', 'prescriptionId diagnosis')
+        .populate('patient', 'fullName patientId')
+        .populate('doctor', 'fullName specialization')
+        .populate('uploadedBy', 'fullName adminId');
+
+    if (!record) {
+        return next(new AppError('Medical record not found', 404));
+    }
+
+    logger.info(`Medical record updated: ${record.recordId} by admin: ${req.user.adminId}`);
+
+    res.status(200).json({
+        status: 'success',
+        message: 'Medical record updated successfully',
+        data: {
+            medicalRecord: record
+        }
+    });
+});
+
 module.exports = {
     getMyProfile,
     updateMyProfile,
@@ -703,5 +1080,13 @@ module.exports = {
     getAdminTeam,
     updateAdminPermissions,
     getSystemHealth,
-    exportSystemData
+    exportSystemData,
+    createAdmin,
+    // Medical Record functions
+    searchPatientWithPrescriptions,
+    createMedicalRecord,
+    uploadTestResult,
+    getAllMedicalRecords,
+    getMedicalRecordDetails,
+    updateMedicalRecord
 };

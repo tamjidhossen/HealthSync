@@ -12,6 +12,7 @@ const doctorRoutes = require('./doctorRoutes');
 const patientRoutes = require('./patientRoutes');
 const adminRoutes = require('./adminRoutes'); // Phase 3C
 const appointmentRoutes = require('./appointmentRoutes'); // Phase 4
+const prescriptionRoutes = require('./prescriptionRoutes'); // Phase 5A
 
 // API Documentation route
 router.get('/docs', (req, res) => {
@@ -73,6 +74,21 @@ router.get('/docs', (req, res) => {
           'POST /appointments/:id/feedback - Submit feedback',
         ],
       },
+      prescriptions: {
+        base: '/prescriptions',
+        routes: [
+          'POST /prescriptions - Create new prescription',
+          'GET /prescriptions/my-prescriptions - Get patient prescriptions',
+          'GET /prescriptions/doctor-prescriptions - Get doctor prescriptions',
+          'GET /prescriptions/:id - Get prescription details',
+          'PUT /prescriptions/:id - Update prescription',
+          'DELETE /prescriptions/:id - Cancel prescription',
+          'POST /prescriptions/:id/medicines - Add medicine',
+          'DELETE /prescriptions/:id/medicines/:medicineId - Remove medicine',
+          'POST /prescriptions/:id/tests - Add medical test',
+          'GET /prescriptions/stats - Get prescription statistics',
+        ],
+      },
       admin: {
         base: '/admin',
         routes: [
@@ -95,6 +111,10 @@ router.get('/docs', (req, res) => {
       'Schedule Optimization',
       'Medical Notes & Feedback',
       'Multi-mode Consultations',
+      'Prescription Management',
+      'Digital Medicine Tracking',
+      'Medical Test Ordering',
+      'Follow-up Scheduling',
     ],
   });
 });
@@ -109,18 +129,19 @@ router.get('/status', (req, res) => {
   });
 });
 
-// Route mounting - Phase 2 Complete + Phase 3A (Doctor) + Phase 3B (Patient) + Phase 3C (Admin) + Phase 4 (Appointments)
+// Route mounting - Phase 2 Complete + Phase 3A (Doctor) + Phase 3B (Patient) + Phase 3C (Admin) + Phase 4 (Appointments) + Phase 5A (Prescriptions)
 router.use('/auth', authRoutes);
 router.use('/doctors', doctorRoutes);
 router.use('/patients', patientRoutes);
 router.use('/admin', adminRoutes); // Phase 3C
 router.use('/appointments', appointmentRoutes); // Phase 4
+router.use('/prescriptions', prescriptionRoutes); // Phase 5A
 
 router.get('/', (req, res) => {
   res.status(200).json({
     message: 'Welcome to HealthSync API v1.0.0',
-    status: '✅ Phase 4 Complete - Appointment Management System Ready!',
-    nextPhase: 'Phase 5: Telemedicine & Video Consultation System',
+    status: '✅ Phase 5A Complete - Prescription Management System Ready!',
+    nextPhase: 'Phase 5B: Telemedicine & Video Consultation System',
     availableRoutes: [
       'GET /api/v1/ - This welcome message',
       'GET /api/v1/docs - API documentation',
@@ -155,7 +176,16 @@ router.get('/', (req, res) => {
       '📅 DELETE /api/v1/appointments/:id - Cancel appointment',
       '📅 PUT /api/v1/appointments/:id/notes - Add medical notes',
       '📅 POST /api/v1/appointments/:id/feedback - Submit feedback',
-      '📅 GET /api/v1/appointments/stats - Appointment analytics'
+      '📅 GET /api/v1/appointments/stats - Appointment analytics',
+      '💊 POST /api/v1/prescriptions - Create prescription',
+      '💊 GET /api/v1/prescriptions/my-prescriptions - Get patient prescriptions',
+      '💊 GET /api/v1/prescriptions/doctor-prescriptions - Get doctor prescriptions',
+      '💊 GET /api/v1/prescriptions/:id - Get prescription details',
+      '💊 PUT /api/v1/prescriptions/:id - Update prescription',
+      '💊 DELETE /api/v1/prescriptions/:id - Cancel prescription',
+      '💊 POST /api/v1/prescriptions/:id/medicines - Add medicine',
+      '💊 POST /api/v1/prescriptions/:id/tests - Add medical test',
+      '💊 GET /api/v1/prescriptions/stats - Prescription analytics'
     ],
   });
 });

@@ -320,13 +320,114 @@ const EXPORT_FORMATS = [
   'xlsx'
 ];
 
+// Prescription Status
+const PRESCRIPTION_STATUS = {
+  ACTIVE: 'active',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+  EXPIRED: 'expired',
+};
+
+// Prescription Priority
+const PRESCRIPTION_PRIORITY = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  EMERGENCY: 'emergency',
+};
+
+// Medical Test Urgency
+const MEDICAL_TEST_URGENCY = {
+  IMMEDIATE: 'immediate',
+  WITHIN_24_HOURS: 'within-24-hours',
+  WITHIN_WEEK: 'within-week',
+  ROUTINE: 'routine',
+};
+
+// Medicine Frequencies
+const MEDICINE_FREQUENCIES = [
+  'Once daily',
+  'Twice daily',
+  'Three times daily',
+  'Four times daily',
+  'Every 4 hours',
+  'Every 6 hours',
+  'Every 8 hours',
+  'Every 12 hours',
+  'As needed',
+  'Before meals',
+  'After meals',
+  'At bedtime',
+];
+
+// Medicine Durations
+const MEDICINE_DURATIONS = [
+  '3 days',
+  '5 days',
+  '7 days',
+  '10 days',
+  '14 days',
+  '21 days',
+  '30 days',
+  '3 months',
+  '6 months',
+  'Ongoing',
+];
+
+// Common Medicine Dosages
+const COMMON_DOSAGES = [
+  '250mg',
+  '500mg',
+  '1000mg',
+  '5mg',
+  '10mg',
+  '25mg',
+  '50mg',
+  '100mg',
+  '1 tablet',
+  '2 tablets',
+  '1 capsule',
+  '2 capsules',
+  '5ml',
+  '10ml',
+  '1 teaspoon',
+  '2 teaspoons',
+  '1 tablespoon',
+];
+
+// Prescription Digital Signature Status
+const SIGNATURE_STATUS = {
+  PENDING: 'pending',
+  SIGNED: 'signed',
+  REJECTED: 'rejected',
+};
+
+// Follow-up Urgency
+const FOLLOWUP_URGENCY = {
+  ROUTINE: 'routine',
+  URGENT: 'urgent',
+  EMERGENCY: 'emergency',
+};
+
+// Prescription Categories/Tags
+const PRESCRIPTION_CATEGORIES = [
+  'chronic-condition',
+  'acute-treatment',
+  'preventive-care',
+  'post-operative',
+  'emergency',
+  'routine-medication',
+  'diagnostic-tests',
+  'rehabilitation',
+];
+
 // ID Prefixes
 const ID_PREFIXES = {
   DOCTOR: 'DOC',
   PATIENT: 'PAT',
   ADMIN: 'ADM',
   APPOINTMENT: 'APPT',
-  PRESCRIPTION: 'PRES',
+  PRESCRIPTION: 'PRSC',
   MEDICAL_RECORD: 'MR',
   CHAT_SESSION: 'CHAT',
 };
@@ -365,4 +466,14 @@ module.exports = {
   DASHBOARD_VIEWS,
   EXPORT_DATA_TYPES,
   EXPORT_FORMATS,
+  // Prescription constants
+  PRESCRIPTION_STATUS,
+  PRESCRIPTION_PRIORITY,
+  MEDICAL_TEST_URGENCY,
+  MEDICINE_FREQUENCIES,
+  MEDICINE_DURATIONS,
+  COMMON_DOSAGES,
+  SIGNATURE_STATUS,
+  FOLLOWUP_URGENCY,
+  PRESCRIPTION_CATEGORIES,
 };

@@ -11,6 +11,7 @@
     "test:phase2": "node test-phase2.js",
     "test:phase3a": "node test-phase3a.js",
     "seed": "node scripts/seedDatabase.js",
+    "seed:admin": "node scripts/seedAdmin.js",
     "create-admin": "node scripts/createAdmin.js",
     "clear-db": "node scripts/clearDatabase.js"
   },

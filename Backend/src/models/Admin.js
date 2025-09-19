@@ -10,7 +10,7 @@ const adminSchema = new mongoose.Schema(
   {
     adminId: {
       type: String,
-      required: true,
+      // required: true,
       unique: true,
       match: /^ADM-\d{4}$/, // Format: ADM-1001
     },
@@ -18,9 +18,9 @@ const adminSchema = new mongoose.Schema(
     // Basic Information
     fullName: {
       type: String,
-      required: [true, 'Full name is required'],
       trim: true,
       maxLength: [100, 'Name cannot exceed 100 characters'],
+      default: 'Admin User', // Default value for simplified creation
     },
     email: {
       type: String,
@@ -34,8 +34,8 @@ const adminSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: [true, 'Phone number is required'],
       match: [/^[0-9]{10,15}$/, 'Please provide a valid phone number'],
+      default: null, // Make phone optional
     },
     passwordHash: {
       type: String,
@@ -76,13 +76,13 @@ const adminSchema = new mongoose.Schema(
     // Verification & Activity Logs
     verifiedDoctors: [
       {
-        doctor: { 
-          type: mongoose.Schema.Types.ObjectId, 
+        doctor: {
+          type: mongoose.Schema.Types.ObjectId,
           ref: 'Doctor',
           required: true,
         },
-        action: { 
-          type: String, 
+        action: {
+          type: String,
           enum: ['approved', 'rejected', 'suspended', 'reactivated'],
           required: true,
         },
@@ -94,8 +94,8 @@ const adminSchema = new mongoose.Schema(
           type: String,
           trim: true,
         },
-        timestamp: { 
-          type: Date, 
+        timestamp: {
+          type: Date,
           default: Date.now,
         },
       },
@@ -103,13 +103,13 @@ const adminSchema = new mongoose.Schema(
 
     verifiedPatients: [
       {
-        patient: { 
-          type: mongoose.Schema.Types.ObjectId, 
+        patient: {
+          type: mongoose.Schema.Types.ObjectId,
           ref: 'Patient',
           required: true,
         },
-        action: { 
-          type: String, 
+        action: {
+          type: String,
           enum: ['approved', 'rejected', 'suspended', 'reactivated'],
           required: true,
         },
@@ -121,8 +121,8 @@ const adminSchema = new mongoose.Schema(
           type: String,
           trim: true,
         },
-        timestamp: { 
-          type: Date, 
+        timestamp: {
+          type: Date,
           default: Date.now,
         },
       },
@@ -206,7 +206,7 @@ const adminSchema = new mongoose.Schema(
       type: String,
       select: false,
     },
-    
+
     // Password Reset
     passwordResetToken: {
       type: String,
@@ -283,11 +283,11 @@ const adminSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { 
+  {
     timestamps: true,
-    toJSON: { 
+    toJSON: {
       virtuals: true,
-      transform: function(doc, ret) {
+      transform: function (doc, ret) {
         delete ret.passwordHash;
         delete ret.passwordResetToken;
         delete ret.emailVerificationCode;
@@ -307,30 +307,30 @@ adminSchema.index({ isActive: 1 });
 adminSchema.index({ 'systemActions.timestamp': -1 });
 
 // Virtual for profile URL
-adminSchema.virtual('profileUrl').get(function() {
+adminSchema.virtual('profileUrl').get(function () {
   return `/api/v1/admin/${this._id}`;
 });
 
 // Virtual for account locked status
-adminSchema.virtual('isAccountLocked').get(function() {
+adminSchema.virtual('isAccountLocked').get(function () {
   return !!(this.accountLockedUntil && this.accountLockedUntil > Date.now());
 });
 
 // Pre-save middleware to hash password
-adminSchema.pre('save', async function(next) {
+adminSchema.pre('save', async function (next) {
   // Only hash password if it's been modified
   if (!this.isModified('passwordHash')) return next();
-  
+
   try {
     // Hash password with cost of 12
     const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
     this.passwordHash = await bcrypt.hash(this.passwordHash, saltRounds);
-    
+
     // Set password changed timestamp
     if (!this.isNew) {
       this.passwordChangedAt = Date.now() - 1000; // 1 second before now
     }
-    
+
     next();
   } catch (error) {
     next(error);
@@ -338,7 +338,7 @@ adminSchema.pre('save', async function(next) {
 });
 
 // Pre-save middleware to generate adminId if not provided
-adminSchema.pre('save', async function(next) {
+adminSchema.pre('save', async function (next) {
   if (this.isNew && !this.adminId) {
     try {
       const generateId = require('../utils/generateId');
@@ -353,26 +353,26 @@ adminSchema.pre('save', async function(next) {
 });
 
 // Update statistics when verification arrays are modified
-adminSchema.pre('save', function(next) {
+adminSchema.pre('save', function (next) {
   if (this.isModified('verifiedDoctors')) {
     this.statistics.totalDoctorsVerified = this.verifiedDoctors.length;
     this.statistics.lastVerificationDate = Date.now();
   }
-  
+
   if (this.isModified('verifiedPatients')) {
     this.statistics.totalPatientsVerified = this.verifiedPatients.length;
     this.statistics.lastVerificationDate = Date.now();
   }
-  
+
   if (this.isModified('systemActions')) {
     this.statistics.totalActionsPerformed = this.systemActions.length;
   }
-  
+
   next();
 });
 
 // Instance method to check password
-adminSchema.methods.checkPassword = async function(candidatePassword) {
+adminSchema.methods.checkPassword = async function (candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.passwordHash);
   } catch (error) {
@@ -381,7 +381,7 @@ adminSchema.methods.checkPassword = async function(candidatePassword) {
 };
 
 // Instance method to check if password was changed after JWT was issued
-adminSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+adminSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
     return JWTTimestamp < changedTimestamp;
@@ -390,22 +390,22 @@ adminSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 };
 
 // Instance method to create password reset token
-adminSchema.methods.createPasswordResetToken = function() {
+adminSchema.methods.createPasswordResetToken = function () {
   const crypto = require('crypto');
   const resetToken = crypto.randomBytes(32).toString('hex');
-  
+
   this.passwordResetToken = crypto
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
-    
+
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-  
+
   return resetToken;
 };
 
 // Instance method to create email verification code
-adminSchema.methods.createEmailVerificationCode = function() {
+adminSchema.methods.createEmailVerificationCode = function () {
   const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
   this.emailVerificationCode = code;
   this.emailVerificationExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
@@ -413,7 +413,7 @@ adminSchema.methods.createEmailVerificationCode = function() {
 };
 
 // Instance method to log system action
-adminSchema.methods.logSystemAction = function(action, target, description, metadata = {}) {
+adminSchema.methods.logSystemAction = function (action, target, description, metadata = {}) {
   this.systemActions.push({
     action,
     target,
@@ -421,7 +421,7 @@ adminSchema.methods.logSystemAction = function(action, target, description, meta
     metadata,
     timestamp: new Date(),
   });
-  
+
   // Keep only last 1000 actions to prevent unlimited growth
   if (this.systemActions.length > 1000) {
     this.systemActions = this.systemActions.slice(-1000);
@@ -429,26 +429,26 @@ adminSchema.methods.logSystemAction = function(action, target, description, meta
 };
 
 // Instance method to check permissions
-adminSchema.methods.hasPermission = function(resource, action) {
+adminSchema.methods.hasPermission = function (resource, action) {
   // Super admin has all permissions
   if (this.isSuperAdmin) return true;
-  
+
   const permission = this.permissions.find(p => p.resource === resource);
   return permission && permission.actions.includes(action);
 };
 
 // Static method to find by adminId
-adminSchema.statics.findByAdminId = function(adminId) {
+adminSchema.statics.findByAdminId = function (adminId) {
   return this.findOne({ adminId });
 };
 
 // Static method to find active admins
-adminSchema.statics.findActive = function() {
+adminSchema.statics.findActive = function () {
   return this.find({ isActive: true });
 };
 
 // Static method to get system statistics
-adminSchema.statics.getSystemStats = async function() {
+adminSchema.statics.getSystemStats = async function () {
   const totalAdmins = await this.countDocuments({ isActive: true });
   const superAdmins = await this.countDocuments({ isSuperAdmin: true, isActive: true });
   const recentActions = await this.aggregate([
@@ -457,7 +457,7 @@ adminSchema.statics.getSystemStats = async function() {
     { $limit: 10 },
     { $replaceRoot: { newRoot: '$systemActions' } },
   ]);
-  
+
   return {
     totalAdmins,
     superAdmins,

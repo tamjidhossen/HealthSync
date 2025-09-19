@@ -966,30 +966,56 @@ const validateAdminSearch = [
  * Validation rules for system maintenance actions
  */
 const validateSystemMaintenance = [
-  body('action')
-    .notEmpty()
-    .withMessage('Maintenance action is required')
-    .isIn(['backup', 'cleanup', 'optimization', 'security-scan'])
-    .withMessage('Invalid maintenance action'),
+  body('maintenanceType')
+    .isIn(['scheduled', 'emergency', 'upgrade'])
+    .withMessage('Maintenance type must be scheduled, emergency, or upgrade'),
 
   body('description')
     .notEmpty()
-    .withMessage('Action description is required')
+    .withMessage('Maintenance description is required')
     .isLength({ min: 10, max: 500 })
     .withMessage('Description must be between 10 and 500 characters'),
 
   body('scheduledAt')
     .optional()
     .isISO8601()
-    .toDate()
-    .withMessage('Scheduled time must be a valid date'),
+    .withMessage('Please provide a valid scheduled date'),
 
   body('estimatedDuration')
     .optional()
-    .isInt({ min: 1, max: 1440 })
-    .withMessage('Estimated duration must be between 1 and 1440 minutes'),
+    .isInt({ min: 1 })
+    .withMessage('Estimated duration must be a positive number (in minutes)'),
 
-  handleValidationErrors
+  handleValidationErrors,
+];
+
+/**
+ * Validate admin creation request (simplified)
+ */
+const validateAdminCreation = [
+  body('email')
+    .isEmail()
+    .withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number'),
+
+  body('fullName')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Full name must be between 2 and 100 characters'),
+
+  body('role')
+    .optional()
+    .isIn(['admin', 'super-admin', 'moderator'])
+    .withMessage('Role must be admin, super-admin, or moderator'),
+
+  handleValidationErrors,
 ];
 
 /**
@@ -1217,6 +1243,370 @@ const validateAppointmentQuery = [
   handleValidationErrors
 ];
 
+/**
+ * Validation rules for prescription creation
+ */
+const validatePrescriptionCreate = [
+  body('patientId')
+    .notEmpty()
+    .withMessage('Patient ID is required')
+    .isMongoId()
+    .withMessage('Patient ID must be a valid MongoDB ObjectId'),
+
+  body('appointmentId')
+    .optional()
+    .isMongoId()
+    .withMessage('Appointment ID must be a valid MongoDB ObjectId'),
+
+  body('diagnosis.primary')
+    .notEmpty()
+    .withMessage('Primary diagnosis is required')
+    .isLength({ min: 3, max: 500 })
+    .withMessage('Primary diagnosis must be between 3 and 500 characters'),
+
+  body('diagnosis.secondary')
+    .optional()
+    .isArray()
+    .withMessage('Secondary diagnosis must be an array'),
+
+  body('medicines')
+    .optional()
+    .isArray()
+    .withMessage('Medicines must be an array'),
+
+  body('medicines.*.name')
+    .if(body('medicines').exists())
+    .notEmpty()
+    .withMessage('Medicine name is required')
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Medicine name must be between 2 and 200 characters'),
+
+  body('medicines.*.dosage')
+    .if(body('medicines').exists())
+    .notEmpty()
+    .withMessage('Medicine dosage is required')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Medicine dosage must be between 2 and 50 characters'),
+
+  body('medicines.*.frequency')
+    .if(body('medicines').exists())
+    .notEmpty()
+    .withMessage('Medicine frequency is required')
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Medicine frequency must be between 2 and 100 characters'),
+
+  body('medicines.*.duration')
+    .if(body('medicines').exists())
+    .notEmpty()
+    .withMessage('Medicine duration is required')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Medicine duration must be between 2 and 50 characters'),
+
+  body('medicines.*.quantity')
+    .if(body('medicines').exists())
+    .optional()
+    .isInt({ min: 1, max: 1000 })
+    .withMessage('Medicine quantity must be between 1 and 1000'),
+
+  body('medicines.*.refills')
+    .if(body('medicines').exists())
+    .optional()
+    .isInt({ min: 0, max: 10 })
+    .withMessage('Medicine refills must be between 0 and 10'),
+
+  body('medicalTests')
+    .optional()
+    .isArray()
+    .withMessage('Medical tests must be an array'),
+
+  body('medicalTests.*.name')
+    .if(body('medicalTests').exists())
+    .notEmpty()
+    .withMessage('Test name is required')
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Test name must be between 2 and 200 characters'),
+
+  body('medicalTests.*.urgency')
+    .if(body('medicalTests').exists())
+    .optional()
+    .isIn(['immediate', 'within-24-hours', 'within-week', 'routine'])
+    .withMessage('Test urgency must be: immediate, within-24-hours, within-week, or routine'),
+
+  body('medicalTests.*.scheduledFor')
+    .if(body('medicalTests').exists())
+    .optional()
+    .isISO8601()
+    .withMessage('Scheduled date must be a valid ISO 8601 date')
+    .custom((value) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Scheduled date must be in the future');
+      }
+      return true;
+    }),
+
+  body('vitalSigns.bloodPressure.systolic')
+    .optional()
+    .isInt({ min: 70, max: 250 })
+    .withMessage('Systolic blood pressure must be between 70 and 250'),
+
+  body('vitalSigns.bloodPressure.diastolic')
+    .optional()
+    .isInt({ min: 40, max: 150 })
+    .withMessage('Diastolic blood pressure must be between 40 and 150'),
+
+  body('vitalSigns.heartRate')
+    .optional()
+    .isInt({ min: 40, max: 200 })
+    .withMessage('Heart rate must be between 40 and 200 BPM'),
+
+  body('vitalSigns.temperature')
+    .optional()
+    .isFloat({ min: 95, max: 110 })
+    .withMessage('Temperature must be between 95°F and 110°F'),
+
+  body('vitalSigns.weight')
+    .optional()
+    .isFloat({ min: 1, max: 500 })
+    .withMessage('Weight must be between 1 and 500 kg'),
+
+  body('vitalSigns.height')
+    .optional()
+    .isFloat({ min: 30, max: 250 })
+    .withMessage('Height must be between 30 and 250 cm'),
+
+  body('followUp.required')
+    .optional()
+    .isBoolean()
+    .withMessage('Follow-up required must be a boolean'),
+
+  body('followUp.date')
+    .if(body('followUp.required').equals(true))
+    .notEmpty()
+    .withMessage('Follow-up date is required when follow-up is marked as required')
+    .isISO8601()
+    .withMessage('Follow-up date must be a valid ISO 8601 date')
+    .custom((value) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Follow-up date must be in the future');
+      }
+      return true;
+    }),
+
+  body('followUp.urgency')
+    .optional()
+    .isIn(['routine', 'urgent', 'emergency'])
+    .withMessage('Follow-up urgency must be: routine, urgent, or emergency'),
+
+  body('priority')
+    .optional()
+    .isIn(['low', 'medium', 'high', 'emergency'])
+    .withMessage('Priority must be: low, medium, high, or emergency'),
+
+  body('validUntil')
+    .optional()
+    .isISO8601()
+    .withMessage('Valid until date must be a valid ISO 8601 date')
+    .custom((value) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Valid until date must be in the future');
+      }
+      return true;
+    }),
+
+  body('isEmergency')
+    .optional()
+    .isBoolean()
+    .withMessage('Is emergency must be a boolean'),
+
+  handleValidationErrors,
+];
+
+/**
+ * Validation rules for prescription update
+ */
+const validatePrescriptionUpdate = [
+  body('diagnosis.primary')
+    .optional()
+    .isLength({ min: 3, max: 500 })
+    .withMessage('Primary diagnosis must be between 3 and 500 characters'),
+
+  body('diagnosis.secondary')
+    .optional()
+    .isArray()
+    .withMessage('Secondary diagnosis must be an array'),
+
+  body('medicines')
+    .optional()
+    .isArray()
+    .withMessage('Medicines must be an array'),
+
+  body('medicines.*.name')
+    .if(body('medicines').exists())
+    .notEmpty()
+    .withMessage('Medicine name is required')
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Medicine name must be between 2 and 200 characters'),
+
+  body('medicines.*.dosage')
+    .if(body('medicines').exists())
+    .notEmpty()
+    .withMessage('Medicine dosage is required'),
+
+  body('medicines.*.frequency')
+    .if(body('medicines').exists())
+    .notEmpty()
+    .withMessage('Medicine frequency is required'),
+
+  body('medicines.*.duration')
+    .if(body('medicines').exists())
+    .notEmpty()
+    .withMessage('Medicine duration is required'),
+
+  body('medicalTests')
+    .optional()
+    .isArray()
+    .withMessage('Medical tests must be an array'),
+
+  body('medicalTests.*.name')
+    .if(body('medicalTests').exists())
+    .notEmpty()
+    .withMessage('Test name is required'),
+
+  body('medicalTests.*.urgency')
+    .if(body('medicalTests').exists())
+    .optional()
+    .isIn(['immediate', 'within-24-hours', 'within-week', 'routine'])
+    .withMessage('Test urgency must be valid'),
+
+  body('priority')
+    .optional()
+    .isIn(['low', 'medium', 'high', 'emergency'])
+    .withMessage('Priority must be: low, medium, high, or emergency'),
+
+  body('validUntil')
+    .optional()
+    .isISO8601()
+    .withMessage('Valid until date must be a valid ISO 8601 date')
+    .custom((value) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Valid until date must be in the future');
+      }
+      return true;
+    }),
+
+  handleValidationErrors,
+];
+
+/**
+ * Validation rules for adding medicine to prescription
+ */
+const validateMedicine = [
+  body('name')
+    .notEmpty()
+    .withMessage('Medicine name is required')
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Medicine name must be between 2 and 200 characters'),
+
+  body('genericName')
+    .optional()
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Generic name must be between 2 and 200 characters'),
+
+  body('dosage')
+    .notEmpty()
+    .withMessage('Dosage is required')
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Dosage must be between 1 and 50 characters'),
+
+  body('frequency')
+    .notEmpty()
+    .withMessage('Frequency is required')
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Frequency must be between 2 and 100 characters'),
+
+  body('duration')
+    .notEmpty()
+    .withMessage('Duration is required')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Duration must be between 2 and 50 characters'),
+
+  body('instructions')
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage('Instructions must not exceed 500 characters'),
+
+  body('notes')
+    .optional()
+    .isLength({ max: 1000 })
+    .withMessage('Notes must not exceed 1000 characters'),
+
+  body('quantity')
+    .optional()
+    .isInt({ min: 1, max: 1000 })
+    .withMessage('Quantity must be between 1 and 1000'),
+
+  body('refills')
+    .optional()
+    .isInt({ min: 0, max: 10 })
+    .withMessage('Refills must be between 0 and 10'),
+
+  handleValidationErrors,
+];
+
+/**
+ * Validation rules for adding medical test to prescription
+ */
+const validateMedicalTest = [
+  body('name')
+    .notEmpty()
+    .withMessage('Test name is required')
+    .isLength({ min: 2, max: 200 })
+    .withMessage('Test name must be between 2 and 200 characters'),
+
+  body('testCode')
+    .optional()
+    .isLength({ min: 2, max: 20 })
+    .withMessage('Test code must be between 2 and 20 characters'),
+
+  body('description')
+    .optional()
+    .isLength({ max: 1000 })
+    .withMessage('Description must not exceed 1000 characters'),
+
+  body('urgency')
+    .optional()
+    .isIn(['immediate', 'within-24-hours', 'within-week', 'routine'])
+    .withMessage('Urgency must be: immediate, within-24-hours, within-week, or routine'),
+
+  body('scheduledFor')
+    .optional()
+    .isISO8601()
+    .withMessage('Scheduled date must be a valid ISO 8601 date')
+    .custom((value) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Scheduled date must be in the future');
+      }
+      return true;
+    }),
+
+  body('instructions')
+    .optional()
+    .isLength({ max: 1000 })
+    .withMessage('Instructions must not exceed 1000 characters'),
+
+  body('fastingRequired')
+    .optional()
+    .isBoolean()
+    .withMessage('Fasting required must be a boolean'),
+
+  body('preparationInstructions')
+    .optional()
+    .isLength({ max: 1000 })
+    .withMessage('Preparation instructions must not exceed 1000 characters'),
+
+  handleValidationErrors,
+];
+
 module.exports = {
   validateDoctorRegistration,
   validatePatientRegistration,
@@ -1252,6 +1642,7 @@ module.exports = {
   validateDataExport,
   validateAdminSearch,
   validateSystemMaintenance,
+  validateAdminCreation, // New validation
 
   // Appointment validations
   validateAppointmentBooking,
@@ -1259,5 +1650,11 @@ module.exports = {
   validateAppointmentReschedule,
   validateMedicalNotes,
   validateAppointmentFeedback,
-  validateAppointmentQuery
+  validateAppointmentQuery,
+
+  // Prescription validations
+  validatePrescriptionCreate,
+  validatePrescriptionUpdate,
+  validateMedicine,
+  validateMedicalTest
 };

@@ -1,0 +1,589 @@
+{
+    "info": {
+        "name": "HealthSync Prescription Test Data",
+        "description": "Complete test data for prescription management system",
+        "version": "1.0.0",
+        "baseUrl": "http://localhost:5000/api/v1"
+    },
+    "testUsers": {
+        "doctors": [
+            {
+                "fullName": "Dr. Sarah Johnson",
+                "email": "sarah.johnson@healthsync.com",
+                "password": "Doctor123!",
+                "phone": "+8801712345678",
+                "specialization": "Cardiology",
+                "medicalLicense": "MD-12345-BD",
+                "hospitalAffiliation": "Dhaka Medical College Hospital"
+            },
+            {
+                "fullName": "Dr. Ahmed Rahman",
+                "email": "ahmed.rahman@healthsync.com",
+                "password": "Doctor123!",
+                "phone": "+8801812345679",
+                "specialization": "General Medicine",
+                "medicalLicense": "MD-67890-BD",
+                "hospitalAffiliation": "Square Hospital"
+            }
+        ],
+        "patients": [
+            {
+                "fullName": "John Smith",
+                "email": "john.smith@email.com",
+                "password": "Patient123!",
+                "phone": "+8801912345678",
+                "age": 35,
+                "bloodGroup": "A+",
+                "gender": "male"
+            },
+            {
+                "fullName": "Maria Garcia",
+                "email": "maria.garcia@email.com",
+                "password": "Patient123!",
+                "phone": "+8801912345679",
+                "age": 28,
+                "bloodGroup": "O-",
+                "gender": "female"
+            }
+        ]
+    },
+    "prescriptionTestData": {
+        "basicPrescription": {
+            "patientId": "REPLACE_WITH_PATIENT_ID",
+            "diagnosis": {
+                "primary": "Hypertension with mild anxiety symptoms",
+                "secondary": [
+                    "Pre-diabetes",
+                    "Vitamin D deficiency"
+                ],
+                "icdCodes": [
+                    {
+                        "code": "I10",
+                        "description": "Essential hypertension"
+                    },
+                    {
+                        "code": "F41.1",
+                        "description": "Generalized anxiety disorder"
+                    }
+                ]
+            },
+            "medicines": [
+                {
+                    "name": "Amlodipine",
+                    "genericName": "Amlodipine besylate",
+                    "dosage": "5mg",
+                    "frequency": "Once daily",
+                    "duration": "30 days",
+                    "instructions": "Take in the morning with or without food",
+                    "notes": "Monitor blood pressure weekly",
+                    "quantity": 30,
+                    "refills": 2
+                },
+                {
+                    "name": "Metformin",
+                    "genericName": "Metformin hydrochloride",
+                    "dosage": "500mg",
+                    "frequency": "Twice daily",
+                    "duration": "30 days",
+                    "instructions": "Take with meals to reduce stomach upset",
+                    "quantity": 60,
+                    "refills": 5
+                },
+                {
+                    "name": "Vitamin D3",
+                    "genericName": "Cholecalciferol",
+                    "dosage": "1000 IU",
+                    "frequency": "Once daily",
+                    "duration": "90 days",
+                    "instructions": "Take with largest meal of the day",
+                    "quantity": 90,
+                    "refills": 3
+                }
+            ],
+            "medicalTests": [
+                {
+                    "name": "Lipid Profile",
+                    "testCode": "LIPID-001",
+                    "description": "Complete cholesterol and triglyceride levels",
+                    "urgency": "within-week",
+                    "scheduledFor": "2025-09-27T09:00:00.000Z",
+                    "instructions": "Fast for 12 hours before test",
+                    "fastingRequired": true,
+                    "preparationInstructions": "No food or drink except water for 12 hours"
+                },
+                {
+                    "name": "HbA1c",
+                    "testCode": "HBA1C-001",
+                    "description": "3-month average blood sugar test",
+                    "urgency": "routine",
+                    "instructions": "No special preparation needed",
+                    "fastingRequired": false
+                }
+            ],
+            "vitalSigns": {
+                "bloodPressure": {
+                    "systolic": 150,
+                    "diastolic": 95
+                },
+                "heartRate": 78,
+                "temperature": 98.6,
+                "weight": 75.5,
+                "height": 170,
+                "respiratoryRate": 16
+            },
+            "followUp": {
+                "required": true,
+                "date": "2025-10-20T14:00:00.000Z",
+                "reason": "Blood pressure monitoring and medication adjustment",
+                "urgency": "routine",
+                "notes": "Check BP control and any side effects"
+            },
+            "clinicalNotes": {
+                "patientHistory": "Patient has family history of diabetes and hypertension. Non-smoker, occasional alcohol use.",
+                "physicalExamination": "BP elevated at 150/95, BMI 26.1 (overweight), otherwise normal examination findings",
+                "treatmentPlan": "Start antihypertensive therapy with Amlodipine, lifestyle modifications including diet and exercise",
+                "patientEducation": "Importance of medication compliance, regular BP monitoring, dietary modifications (low sodium, DASH diet)",
+                "warningsAndPrecautions": "Monitor for ankle swelling, dizziness, or fatigue. Report any muscle pain or weakness."
+            },
+            "priority": "medium",
+            "isEmergency": false
+        },
+        "emergencyPrescription": {
+            "patientId": "REPLACE_WITH_PATIENT_ID",
+            "diagnosis": {
+                "primary": "Acute bacterial pneumonia",
+                "secondary": [
+                    "Dehydration",
+                    "Mild respiratory distress"
+                ],
+                "icdCodes": [
+                    {
+                        "code": "J15.9",
+                        "description": "Unspecified bacterial pneumonia"
+                    }
+                ]
+            },
+            "medicines": [
+                {
+                    "name": "Amoxicillin-Clavulanate",
+                    "genericName": "Amoxicillin/Clavulanic acid",
+                    "dosage": "875mg/125mg",
+                    "frequency": "Twice daily",
+                    "duration": "10 days",
+                    "instructions": "Take with food to prevent stomach upset",
+                    "notes": "Complete full course even if feeling better",
+                    "quantity": 20,
+                    "refills": 0
+                },
+                {
+                    "name": "Albuterol Inhaler",
+                    "genericName": "Salbutamol",
+                    "dosage": "2 puffs",
+                    "frequency": "Every 4-6 hours as needed",
+                    "duration": "30 days",
+                    "instructions": "Use for breathing difficulty, shake well before use",
+                    "notes": "Rinse mouth after use",
+                    "quantity": 1,
+                    "refills": 2
+                },
+                {
+                    "name": "Acetaminophen",
+                    "genericName": "Paracetamol",
+                    "dosage": "500mg",
+                    "frequency": "Every 6 hours as needed",
+                    "duration": "7 days",
+                    "instructions": "For fever and pain relief",
+                    "notes": "Do not exceed 4000mg in 24 hours",
+                    "quantity": 28,
+                    "refills": 1
+                }
+            ],
+            "medicalTests": [
+                {
+                    "name": "Chest X-ray",
+                    "testCode": "CXR-001",
+                    "urgency": "immediate",
+                    "description": "Rule out complications, assess pneumonia severity",
+                    "instructions": "Report to radiology immediately",
+                    "fastingRequired": false
+                },
+                {
+                    "name": "Complete Blood Count",
+                    "testCode": "CBC-001",
+                    "urgency": "immediate",
+                    "description": "Check white blood cell count and infection markers",
+                    "fastingRequired": false
+                }
+            ],
+            "vitalSigns": {
+                "temperature": 101.2,
+                "heartRate": 95,
+                "respiratoryRate": 22,
+                "bloodPressure": {
+                    "systolic": 130,
+                    "diastolic": 80
+                }
+            },
+            "followUp": {
+                "required": true,
+                "date": "2025-09-22T10:00:00.000Z",
+                "reason": "Check response to antibiotics and breathing improvement",
+                "urgency": "urgent",
+                "notes": "If no improvement in 48-72 hours, return immediately"
+            },
+            "clinicalNotes": {
+                "patientHistory": "3-day history of cough, fever, and shortness of breath. No recent travel or sick contacts.",
+                "physicalExamination": "Fever 101.2°F, increased respiratory rate, crackles heard in right lower lobe",
+                "treatmentPlan": "Antibiotic therapy with Amoxicillin-Clavulanate, bronchodilator for breathing support",
+                "patientEducation": "Complete antibiotic course, use inhaler as directed, plenty of fluids and rest",
+                "warningsAndPrecautions": "Return immediately if breathing worsens, fever persists >48hrs, or develops chest pain"
+            },
+            "priority": "high",
+            "isEmergency": true
+        },
+        "diabetesPrescription": {
+            "patientId": "REPLACE_WITH_PATIENT_ID",
+            "diagnosis": {
+                "primary": "Type 2 Diabetes Mellitus, poorly controlled",
+                "secondary": [
+                    "Diabetic neuropathy",
+                    "Hypertension"
+                ],
+                "icdCodes": [
+                    {
+                        "code": "E11.9",
+                        "description": "Type 2 diabetes mellitus without complications"
+                    },
+                    {
+                        "code": "E11.40",
+                        "description": "Type 2 diabetes mellitus with diabetic neuropathy"
+                    }
+                ]
+            },
+            "medicines": [
+                {
+                    "name": "Metformin XR",
+                    "genericName": "Metformin Extended Release",
+                    "dosage": "1000mg",
+                    "frequency": "Once daily",
+                    "duration": "90 days",
+                    "instructions": "Take with dinner",
+                    "notes": "Extended release formulation for better tolerance",
+                    "quantity": 90,
+                    "refills": 5
+                },
+                {
+                    "name": "Glipizide",
+                    "genericName": "Glipizide",
+                    "dosage": "5mg",
+                    "frequency": "Twice daily",
+                    "duration": "30 days",
+                    "instructions": "Take 30 minutes before breakfast and dinner",
+                    "notes": "Monitor for signs of hypoglycemia",
+                    "quantity": 60,
+                    "refills": 5
+                },
+                {
+                    "name": "Gabapentin",
+                    "genericName": "Gabapentin",
+                    "dosage": "300mg",
+                    "frequency": "Three times daily",
+                    "duration": "30 days",
+                    "instructions": "Take with food, start with once daily and increase gradually",
+                    "notes": "For diabetic neuropathy pain",
+                    "quantity": 90,
+                    "refills": 2
+                }
+            ],
+            "medicalTests": [
+                {
+                    "name": "HbA1c",
+                    "testCode": "HBA1C-001",
+                    "description": "Diabetes control monitoring",
+                    "urgency": "within-week",
+                    "scheduledFor": "2025-09-25T08:00:00.000Z",
+                    "fastingRequired": false
+                },
+                {
+                    "name": "Microalbumin",
+                    "testCode": "MICROALB-001",
+                    "description": "Check for early kidney damage",
+                    "urgency": "within-week",
+                    "fastingRequired": false
+                },
+                {
+                    "name": "Comprehensive Metabolic Panel",
+                    "testCode": "CMP-001",
+                    "description": "Kidney and liver function assessment",
+                    "urgency": "within-week",
+                    "fastingRequired": true,
+                    "preparationInstructions": "Fast for 8 hours before test"
+                }
+            ],
+            "vitalSigns": {
+                "bloodPressure": {
+                    "systolic": 145,
+                    "diastolic": 88
+                },
+                "heartRate": 72,
+                "weight": 85.0,
+                "height": 175
+            },
+            "followUp": {
+                "required": true,
+                "date": "2025-10-19T09:00:00.000Z",
+                "reason": "Diabetes management review and HbA1c results",
+                "urgency": "routine",
+                "notes": "Bring glucose log and discuss any hypoglycemic episodes"
+            },
+            "priority": "high",
+            "isEmergency": false
+        },
+        "postSurgicalPrescription": {
+            "patientId": "REPLACE_WITH_PATIENT_ID",
+            "diagnosis": {
+                "primary": "Post-operative care following appendectomy",
+                "secondary": [
+                    "Mild post-operative pain"
+                ],
+                "icdCodes": [
+                    {
+                        "code": "Z98.89",
+                        "description": "Other specified postprocedural states"
+                    }
+                ]
+            },
+            "medicines": [
+                {
+                    "name": "Cephalexin",
+                    "genericName": "Cephalexin",
+                    "dosage": "500mg",
+                    "frequency": "Four times daily",
+                    "duration": "7 days",
+                    "instructions": "Take every 6 hours, complete full course",
+                    "notes": "Post-operative antibiotic prophylaxis",
+                    "quantity": 28,
+                    "refills": 0
+                },
+                {
+                    "name": "Ibuprofen",
+                    "genericName": "Ibuprofen",
+                    "dosage": "600mg",
+                    "frequency": "Three times daily as needed",
+                    "duration": "5 days",
+                    "instructions": "Take with food for pain and inflammation",
+                    "notes": "Can alternate with acetaminophen",
+                    "quantity": 15,
+                    "refills": 1
+                },
+                {
+                    "name": "Docusate Sodium",
+                    "genericName": "Docusate",
+                    "dosage": "100mg",
+                    "frequency": "Twice daily",
+                    "duration": "10 days",
+                    "instructions": "Stool softener to prevent straining",
+                    "notes": "Take with plenty of water",
+                    "quantity": 20,
+                    "refills": 0
+                }
+            ],
+            "followUp": {
+                "required": true,
+                "date": "2025-09-26T14:00:00.000Z",
+                "reason": "Post-operative wound check and suture removal",
+                "urgency": "routine",
+                "notes": "Assess healing, remove sutures if appropriate"
+            },
+            "clinicalNotes": {
+                "treatmentPlan": "Post-operative care with antibiotic prophylaxis and pain management",
+                "patientEducation": "Wound care instructions, signs of infection to watch for",
+                "warningsAndPrecautions": "Report fever >101°F, increased pain, redness, or drainage from incision"
+            },
+            "priority": "medium"
+        }
+    },
+    "medicineAdditions": [
+        {
+            "name": "Omeprazole",
+            "genericName": "Omeprazole",
+            "dosage": "20mg",
+            "frequency": "Once daily",
+            "duration": "30 days",
+            "instructions": "Take on empty stomach, 30 minutes before breakfast",
+            "notes": "For acid reflux protection",
+            "quantity": 30,
+            "refills": 2
+        },
+        {
+            "name": "Aspirin",
+            "genericName": "Acetylsalicylic acid",
+            "dosage": "81mg",
+            "frequency": "Once daily",
+            "duration": "Ongoing",
+            "instructions": "Take with food",
+            "notes": "Low-dose for cardiovascular protection",
+            "quantity": 90,
+            "refills": 5
+        }
+    ],
+    "medicalTestAdditions": [
+        {
+            "name": "Thyroid Function Test",
+            "testCode": "TFT-001",
+            "description": "Check TSH, T3, T4 levels",
+            "urgency": "routine",
+            "scheduledFor": "2025-10-01T09:00:00.000Z",
+            "fastingRequired": false,
+            "instructions": "No special preparation needed"
+        },
+        {
+            "name": "Echocardiogram",
+            "testCode": "ECHO-001",
+            "description": "Heart function assessment",
+            "urgency": "within-week",
+            "instructions": "Wear loose clothing, no caffeine 24 hours prior",
+            "fastingRequired": false
+        }
+    ],
+    "prescriptionUpdates": {
+        "medicineUpdate": {
+            "medicines": [
+                {
+                    "name": "Amlodipine",
+                    "dosage": "10mg",
+                    "frequency": "Once daily",
+                    "duration": "30 days",
+                    "instructions": "Increased dosage due to inadequate BP control",
+                    "notes": "Monitor for ankle swelling",
+                    "quantity": 30,
+                    "refills": 2
+                }
+            ],
+            "followUp": {
+                "required": true,
+                "date": "2025-10-15T14:00:00.000Z",
+                "reason": "Blood pressure recheck after dose adjustment",
+                "urgency": "routine"
+            },
+            "priority": "high"
+        },
+        "addFollowUp": {
+            "followUp": {
+                "required": true,
+                "date": "2025-10-30T10:00:00.000Z",
+                "reason": "Medication tolerance and effectiveness review",
+                "urgency": "routine",
+                "notes": "Bring blood pressure log"
+            }
+        }
+    },
+    "searchQueries": [
+        {
+            "description": "Get active prescriptions",
+            "url": "/prescriptions/my-prescriptions?status=active&page=1&limit=5"
+        },
+        {
+            "description": "Get recent doctor prescriptions",
+            "url": "/prescriptions/doctor-prescriptions?page=1&limit=10&sortBy=createdAt&sortOrder=desc"
+        },
+        {
+            "description": "Search by patient name",
+            "url": "/prescriptions/doctor-prescriptions?patientName=John&page=1&limit=10"
+        },
+        {
+            "description": "Get prescription statistics for current month",
+            "url": "/prescriptions/stats?startDate=2025-09-01&endDate=2025-09-30"
+        }
+    ],
+    "expectedResponses": {
+        "createSuccess": {
+            "status": "success",
+            "message": "Prescription created successfully",
+            "data": {
+                "prescription": {
+                    "prescriptionId": "PRSC-123456",
+                    "status": "active",
+                    "patient": {
+                        "fullName": "John Smith"
+                    },
+                    "doctor": {
+                        "fullName": "Dr. Sarah Johnson"
+                    },
+                    "diagnosis": {
+                        "primary": "Hypertension with mild anxiety symptoms"
+                    },
+                    "medicineCount": 3,
+                    "testCount": 2,
+                    "createdAt": "2025-09-19T10:30:00.000Z"
+                }
+            }
+        },
+        "statsResponse": {
+            "status": "success",
+            "data": {
+                "summary": {
+                    "totalPrescriptions": 15,
+                    "activePrescriptions": 12,
+                    "completedPrescriptions": 3,
+                    "completionRate": "20.00%",
+                    "emergencyPrescriptions": 2,
+                    "averageMedicinesPerPrescription": "2.5"
+                },
+                "breakdown": {
+                    "byStatus": [
+                        {
+                            "_id": "active",
+                            "count": 12
+                        },
+                        {
+                            "_id": "completed",
+                            "count": 3
+                        }
+                    ],
+                    "byPriority": [
+                        {
+                            "_id": "medium",
+                            "count": 8
+                        },
+                        {
+                            "_id": "high",
+                            "count": 5
+                        },
+                        {
+                            "_id": "low",
+                            "count": 2
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "testingInstructions": {
+        "setup": [
+            "1. Register doctor and patient accounts using the testUsers data",
+            "2. Login as doctor to get doctorToken",
+            "3. Login as patient to get patientToken",
+            "4. Replace REPLACE_WITH_PATIENT_ID with actual patient MongoDB ObjectId"
+        ],
+        "testSequence": [
+            "1. Create basic prescription using basicPrescription data",
+            "2. Create emergency prescription using emergencyPrescription data",
+            "3. Test patient viewing prescriptions (my-prescriptions endpoint)",
+            "4. Test doctor viewing prescriptions (doctor-prescriptions endpoint)",
+            "5. Add medicine using medicineAdditions data",
+            "6. Add medical test using medicalTestAdditions data",
+            "7. Update prescription using prescriptionUpdates data",
+            "8. Get prescription statistics",
+            "9. Cancel a prescription",
+            "10. Test various search and filter queries"
+        ],
+        "notes": [
+            "- All medicine names and dosages are realistic and commonly prescribed",
+            "- Test data includes various medical conditions and urgency levels",
+            "- ICD codes are real medical coding standards",
+            "- Vital signs are within realistic ranges",
+            "- Follow-up dates are set appropriately in the future"
+        ]
+    }
+}

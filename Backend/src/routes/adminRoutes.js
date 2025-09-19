@@ -13,7 +13,8 @@ const {
     validateDoctorVerification,
     validateUserSuspension,
     validatePermissionUpdate,
-    validateDataExport
+    validateDataExport,
+    validateAdminCreation
 } = require('../middleware/validation');
 
 const router = express.Router();
@@ -35,7 +36,7 @@ router.use(adminRateLimit);
 
 // Apply authentication to all admin routes
 router.use(authenticate);
-router.use(authorize(['admin']));
+router.use(authorize('admin'));
 
 // Admin Profile Management Routes
 /**
@@ -51,6 +52,13 @@ router.get('/me', adminController.getMyProfile);
  * @access Private (Admin only)
  */
 router.put('/me/profile', validateAdminProfileUpdate, adminController.updateMyProfile);
+
+/**
+ * @route POST /api/v1/admin/create-admin
+ * @desc Create new admin user (simplified process - email and password only)
+ * @access Private (Admin only)
+ */
+router.post('/create-admin', validateAdminCreation, adminController.createAdmin);
 
 // Dashboard and System Overview Routes
 /**
@@ -151,6 +159,49 @@ router.post('/export',
     adminController.exportSystemData
 );
 
+// Medical Records Management Routes
+/**
+ * @route GET /api/v1/admin/patient-search/:patientId
+ * @desc Search patient and get prescriptions with medical records
+ * @access Private (Admin only)
+ */
+router.get('/patient-search/:patientId', adminController.searchPatientWithPrescriptions);
+
+/**
+ * @route GET /api/v1/admin/medical-records
+ * @desc Get all medical records with filtering
+ * @access Private (Admin only)
+ */
+router.get('/medical-records', adminController.getAllMedicalRecords);
+
+/**
+ * @route POST /api/v1/admin/medical-records
+ * @desc Create medical record for prescription
+ * @access Private (Admin only)
+ */
+router.post('/medical-records', adminController.createMedicalRecord);
+
+/**
+ * @route GET /api/v1/admin/medical-records/:recordId
+ * @desc Get medical record details
+ * @access Private (Admin only)
+ */
+router.get('/medical-records/:recordId', adminController.getMedicalRecordDetails);
+
+/**
+ * @route PUT /api/v1/admin/medical-records/:recordId
+ * @desc Update medical record
+ * @access Private (Admin only)
+ */
+router.put('/medical-records/:recordId', adminController.updateMedicalRecord);
+
+/**
+ * @route POST /api/v1/admin/medical-records/:recordId/test-result
+ * @desc Upload test result to medical record
+ * @access Private (Admin only)
+ */
+router.post('/medical-records/:recordId/test-result', adminController.uploadTestResult);
+
 // Route documentation
 router.get('/', (req, res) => {
     res.status(200).json({
@@ -160,7 +211,8 @@ router.get('/', (req, res) => {
         documentation: {
             profile: {
                 'GET /admin/me': 'Get admin profile',
-                'PUT /admin/me/profile': 'Update admin profile'
+                'PUT /admin/me/profile': 'Update admin profile',
+                'POST /admin/create-admin': 'Create new admin (email & password only)'
             },
             dashboard: {
                 'GET /admin/dashboard': 'System dashboard statistics',
@@ -181,6 +233,14 @@ router.get('/', (req, res) => {
             },
             dataManagement: {
                 'POST /admin/export': 'Export system data (Super Admin)'
+            },
+            medicalRecords: {
+                'GET /admin/patient-search/:patientId': 'Search patient with prescriptions',
+                'GET /admin/medical-records': 'List medical records with filters',
+                'POST /admin/medical-records': 'Create medical record',
+                'GET /admin/medical-records/:recordId': 'Get medical record details',
+                'PUT /admin/medical-records/:recordId': 'Update medical record',
+                'POST /admin/medical-records/:recordId/test-result': 'Upload test result'
             }
         },
         permissions: {

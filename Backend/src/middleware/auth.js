@@ -115,7 +115,7 @@ const authorize = (...roles) => {
     if (!req.user || !req.userRole) {
       return next(new AppError('You must be authenticated to access this resource.', 401));
     }
-    console.log(req.user);
+    console.log();
     console.log(req.userRole);
     console.log(roles.includes(req.userRole));
     if (!roles.includes(req.userRole)) {
