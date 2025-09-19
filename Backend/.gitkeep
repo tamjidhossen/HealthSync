@@ -1,0 +1,149 @@
+# HealthSync Backend Structure Plan
+
+## Directory Structure to be Created:
+
+```
+Backend/
+├── src/
+│   ├── controllers/           # Route controllers for handling requests
+│   │   ├── authController.js     # Authentication (login, register, verify)
+│   │   ├── doctorController.js   # Doctor-specific operations
+│   │   ├── patientController.js  # Patient-specific operations
+│   │   ├── adminController.js    # Admin-specific operations
+│   │   ├── appointmentController.js # Appointment management
+│   │   ├── prescriptionController.js # Prescription management
+│   │   └── telemedicineController.js # Chat/telemedicine features
+│   │
+│   ├── models/               # MongoDB/Mongoose schemas
+│   │   ├── User.js              # Base user model (if needed)
+│   │   ├── Doctor.js            # Doctor schema
+│   │   ├── Patient.js           # Patient schema
+│   │   ├── Admin.js             # Admin schema
+│   │   ├── Appointment.js       # Appointment schema
+│   │   ├── Prescription.js      # Prescription schema
+│   │   ├── MedicalRecord.js     # Medical records schema
+│   │   └── ChatSession.js       # Telemedicine chat sessions
+│   │
+│   ├── routes/               # API route definitions
+│   │   ├── index.js             # Main router
+│   │   ├── authRoutes.js        # Authentication routes
+│   │   ├── doctorRoutes.js      # Doctor API routes
+│   │   ├── patientRoutes.js     # Patient API routes
+│   │   ├── adminRoutes.js       # Admin API routes
+│   │   └── telemedicineRoutes.js # Chat/telemedicine routes
+│   │
+│   ├── middleware/           # Custom middleware functions
+│   │   ├── auth.js              # JWT authentication middleware
+│   │   ├── roleAuth.js          # Role-based authorization
+│   │   ├── validation.js        # Request validation middleware
+│   │   ├── errorHandler.js      # Global error handling
+│   │   └── rateLimiter.js       # API rate limiting
+│   │
+│   ├── services/             # Business logic and external services
+│   │   ├── authService.js       # Authentication business logic
+│   │   ├── emailService.js      # Email verification and notifications
+│   │   ├── aiService.js         # AI/LLM integration for medical analysis
+│   │   ├── appointmentService.js # Appointment management logic
+│   │   ├── prescriptionService.js # Prescription management logic
+│   │   └── telemedicineService.js # Chat and video call logic
+│   │
+│   ├── utils/                # Utility functions and helpers
+│   │   ├── constants.js         # App constants and enums
+│   │   ├── helpers.js           # General utility functions
+│   │   ├── validators.js        # Input validation schemas
+│   │   ├── generateId.js        # Custom ID generators (DOC-123, PAT-456)
+│   │   └── responseFormatter.js # Standardized API responses
+│   │
+│   ├── config/               # Configuration files
+│   │   ├── database.js          # MongoDB connection setup
+│   │   ├── jwt.js               # JWT configuration
+│   │   ├── email.js             # Email service configuration
+│   │   └── ai.js                # AI service configuration
+│   │
+│   └── sockets/              # WebSocket handlers for real-time features
+│       ├── index.js             # Socket.IO setup
+│       ├── telemedicineSocket.js # Real-time chat handling
+│       └── notificationSocket.js # Real-time notifications
+│
+├── scripts/                  # Database and utility scripts
+│   ├── seedDatabase.js          # Database seeding for development
+│   ├── createAdmin.js           # Create initial admin user
+│   └── clearDatabase.js         # Database cleanup utility
+│
+├── tests/                    # Test files
+│   ├── unit/                    # Unit tests
+│   ├── integration/             # Integration tests
+│   └── setup.js                 # Test setup configuration
+│
+├── uploads/                  # File upload storage (medical reports, etc.)
+│   ├── medical-reports/
+│   ├── prescriptions/
+│   └── profile-images/
+│
+├── logs/                     # Application logs
+│   ├── error.log
+│   ├── combined.log
+│   └── access.log
+│
+├── package.json              # Dependencies and scripts
+├── .env.example              # Environment variables template
+├── .gitignore                # Git ignore rules
+├── server.js                 # Application entry point
+└── README.md                 # Backend-specific documentation
+```
+
+## Implementation Plan:
+
+### Phase 1: Core Setup
+1. Initialize package.json with dependencies
+2. Set up database connection
+3. Create base server with Express
+4. Implement basic middleware
+
+### Phase 2: Authentication System
+1. User models (Doctor, Patient, Admin)
+2. JWT authentication
+3. Email verification system
+4. Role-based authorization
+
+### Phase 3: Core APIs
+1. Doctor registration and profile management
+2. Patient registration and profile management
+3. Admin verification system
+4. Appointment booking system
+
+### Phase 4: Medical Features
+1. Prescription management
+2. Medical records system
+3. AI integration for medical summaries
+4. Doctor-patient matching system
+
+### Phase 5: Real-time Features
+1. Telemedicine chat system
+2. Real-time notifications
+3. Appointment status updates
+
+### Phase 6: Advanced Features
+1. AI-powered medical recommendations
+2. Analytics and reporting
+3. File upload handling
+4. Performance optimization
+
+## Dependencies to Install:
+- express (web framework)
+- mongoose (MongoDB ODM)
+- bcryptjs (password hashing)
+- jsonwebtoken (JWT tokens)
+- nodemailer (email service)
+- socket.io (real-time communication)
+- multer (file uploads)
+- joi (validation)
+- cors (cross-origin requests)
+- helmet (security headers)
+- morgan (request logging)
+- winston (application logging)
+- express-rate-limit (rate limiting)
+- dotenv (environment variables)
+- openai (AI integration)
+
+This structure follows industry best practices and provides a scalable foundation for the HealthSync system.
