@@ -1,0 +1,401 @@
+// Dummy data for Doctor Dashboard features
+export const doctorData = {
+  // Doctor profile information
+  profile: {
+    id: "DOC001",
+    name: "Dr. Ahmed Rahman",
+    age: 45,
+    gender: "Male",
+    specialization: "Cardiology",
+    experience: "15 years",
+    qualification: "MBBS, MD (Cardiology)",
+    license: "BMA-12345",
+    phone: "+8801811234567",
+    email: "ahmed.rahman@healthsync.com",
+    address: "United Hospital, Dhaka",
+    profilePicture: "/api/placeholder/150/150",
+    registrationDate: "2020-01-15",
+    verificationStatus: "verified",
+    rating: 4.8,
+    totalPatients: 245,
+    consultationFee: 1500,
+  },
+
+  // Today's schedule and appointments
+  todaysSchedule: [
+    {
+      id: "APT001",
+      time: "09:00 AM",
+      duration: 30,
+      patient: {
+        id: "PAT001",
+        name: "Sarah Johnson",
+        age: 32,
+        gender: "Female",
+        phone: "+8801711123456",
+        condition: "Hypertension Follow-up",
+        lastVisit: "2024-08-15",
+        priority: "normal",
+        profilePicture: "/api/placeholder/80/80",
+      },
+      type: "Follow-up",
+      status: "scheduled",
+      notes: "Regular BP monitoring",
+      aiSummary:
+        "Patient has been managing hypertension well with current medication. Last BP reading: 125/82. No new symptoms reported.",
+    },
+    {
+      id: "APT002",
+      time: "09:30 AM",
+      duration: 45,
+      patient: {
+        id: "PAT002",
+        name: "Mohammad Ali",
+        age: 58,
+        gender: "Male",
+        phone: "+8801722234567",
+        condition: "Chest Pain Investigation",
+        lastVisit: "2024-09-10",
+        priority: "high",
+        profilePicture: "/api/placeholder/80/80",
+      },
+      type: "Consultation",
+      status: "scheduled",
+      notes: "Chest pain episodes, ECG required",
+      aiSummary:
+        "Patient reports intermittent chest pain over past week. Family history of heart disease. Recommend ECG and stress test.",
+    },
+    {
+      id: "APT003",
+      time: "10:30 AM",
+      duration: 30,
+      patient: {
+        id: "PAT003",
+        name: "Fatima Begum",
+        age: 42,
+        gender: "Female",
+        phone: "+8801633345678",
+        condition: "Routine Checkup",
+        lastVisit: "2024-06-15",
+        priority: "normal",
+        profilePicture: "/api/placeholder/80/80",
+      },
+      type: "Checkup",
+      status: "completed",
+      notes: "Annual cardiovascular screening",
+      aiSummary:
+        "Healthy patient for routine screening. No cardiovascular risk factors identified. Recommend annual follow-up.",
+    },
+    {
+      id: "APT004",
+      time: "11:30 AM",
+      duration: 30,
+      patient: {
+        id: "PAT004",
+        name: "Rahman Sheikh",
+        age: 35,
+        gender: "Male",
+        phone: "+8801544456789",
+        condition: "Post-Surgery Follow-up",
+        lastVisit: "2024-09-12",
+        priority: "high",
+        profilePicture: "/api/placeholder/80/80",
+      },
+      type: "Post-Op",
+      status: "scheduled",
+      notes: "2 weeks post cardiac stent placement",
+      aiSummary:
+        "Patient recovering well from cardiac stent procedure. No complications reported. Continue prescribed medications.",
+    },
+    {
+      id: "APT005",
+      time: "02:00 PM",
+      duration: 30,
+      patient: {
+        id: "PAT005",
+        name: "Nasreen Akter",
+        age: 28,
+        gender: "Female",
+        phone: "+8801755567890",
+        condition: "Palpitations",
+        lastVisit: null,
+        priority: "normal",
+        profilePicture: "/api/placeholder/80/80",
+      },
+      type: "New Patient",
+      status: "scheduled",
+      notes: "First visit - heart palpitations",
+      aiSummary:
+        "New patient reporting heart palpitations. No previous cardiac history. Thorough evaluation needed.",
+    },
+  ],
+
+  // Patient directory
+  patients: [
+    {
+      id: "PAT001",
+      name: "Sarah Johnson",
+      age: 32,
+      gender: "Female",
+      phone: "+8801711123456",
+      email: "sarah.j@email.com",
+      bloodType: "A+",
+      lastVisit: "2024-08-15",
+      nextAppointment: "2024-09-20",
+      condition: "Hypertension",
+      status: "stable",
+      profilePicture: "/api/placeholder/80/80",
+      medicalHistory: [
+        {
+          date: "2024-08-15",
+          diagnosis: "Essential Hypertension",
+          treatment: "Lisinopril 10mg daily",
+          notes: "BP well controlled",
+        },
+        {
+          date: "2024-05-20",
+          diagnosis: "Hypertension screening",
+          treatment: "Lifestyle modifications",
+          notes: "Initial diagnosis",
+        },
+      ],
+      vitalSigns: {
+        bloodPressure: "125/82",
+        heartRate: "72 bpm",
+        weight: "62 kg",
+        height: "165 cm",
+      },
+      currentMedications: [
+        {
+          name: "Lisinopril",
+          dosage: "10mg",
+          frequency: "Once daily",
+          startDate: "2024-05-20",
+        },
+      ],
+    },
+    {
+      id: "PAT002",
+      name: "Mohammad Ali",
+      age: 58,
+      gender: "Male",
+      phone: "+8801722234567",
+      email: "m.ali@email.com",
+      bloodType: "B+",
+      lastVisit: "2024-09-10",
+      nextAppointment: "2024-09-19",
+      condition: "Chest Pain Investigation",
+      status: "under-investigation",
+      profilePicture: "/api/placeholder/80/80",
+      medicalHistory: [
+        {
+          date: "2024-09-10",
+          diagnosis: "Chest Pain - Rule out CAD",
+          treatment: "Diagnostic workup ordered",
+          notes: "ECG normal, stress test pending",
+        },
+      ],
+      vitalSigns: {
+        bloodPressure: "140/90",
+        heartRate: "85 bpm",
+        weight: "78 kg",
+        height: "172 cm",
+      },
+      currentMedications: [],
+    },
+    {
+      id: "PAT003",
+      name: "Fatima Begum",
+      age: 42,
+      gender: "Female",
+      phone: "+8801633345678",
+      email: "fatima.b@email.com",
+      bloodType: "O+",
+      lastVisit: "2024-09-18",
+      nextAppointment: "2025-09-18",
+      condition: "Healthy",
+      status: "stable",
+      profilePicture: "/api/placeholder/80/80",
+      medicalHistory: [
+        {
+          date: "2024-09-18",
+          diagnosis: "Annual Health Checkup",
+          treatment: "No treatment required",
+          notes: "All parameters normal",
+        },
+      ],
+      vitalSigns: {
+        bloodPressure: "118/75",
+        heartRate: "68 bpm",
+        weight: "58 kg",
+        height: "160 cm",
+      },
+      currentMedications: [],
+    },
+  ],
+
+  // Available time slots for appointments
+  availability: {
+    workingHours: {
+      monday: { start: "09:00", end: "17:00", slots: 16 },
+      tuesday: { start: "09:00", end: "17:00", slots: 16 },
+      wednesday: { start: "09:00", end: "15:00", slots: 12 },
+      thursday: { start: "09:00", end: "17:00", slots: 16 },
+      friday: { start: "09:00", end: "17:00", slots: 16 },
+      saturday: { start: "09:00", end: "13:00", slots: 8 },
+      sunday: { start: "", end: "", slots: 0 },
+    },
+    blockedSlots: [
+      { date: "2024-09-25", time: "11:00", reason: "Medical Conference" },
+      { date: "2024-09-26", time: "14:00", reason: "Surgery" },
+    ],
+    emergencyAvailable: true,
+  },
+
+  // Prescription templates and medicine database
+  prescriptionData: {
+    templates: [
+      {
+        id: "TEMP001",
+        name: "Hypertension Standard",
+        medications: [
+          {
+            name: "Lisinopril",
+            dosage: "10mg",
+            frequency: "Once daily",
+            duration: "30 days",
+          },
+          {
+            name: "Amlodipine",
+            dosage: "5mg",
+            frequency: "Once daily",
+            duration: "30 days",
+          },
+        ],
+        instructions: "Take with food. Monitor BP regularly.",
+      },
+      {
+        id: "TEMP002",
+        name: "Chest Pain Investigation",
+        medications: [
+          {
+            name: "Aspirin",
+            dosage: "75mg",
+            frequency: "Once daily",
+            duration: "30 days",
+          },
+          {
+            name: "Atorvastatin",
+            dosage: "20mg",
+            frequency: "Once daily",
+            duration: "30 days",
+          },
+        ],
+        instructions: "Continue until follow-up visit.",
+      },
+    ],
+    medicineDatabase: [
+      {
+        name: "Lisinopril",
+        category: "ACE Inhibitor",
+        dosages: ["5mg", "10mg", "20mg"],
+        indications: ["Hypertension", "Heart Failure"],
+        contraindications: ["Pregnancy", "Angioedema history"],
+      },
+      {
+        name: "Amlodipine",
+        category: "Calcium Channel Blocker",
+        dosages: ["2.5mg", "5mg", "10mg"],
+        indications: ["Hypertension", "Angina"],
+        contraindications: ["Severe hypotension"],
+      },
+      {
+        name: "Aspirin",
+        category: "Antiplatelet",
+        dosages: ["75mg", "100mg", "150mg"],
+        indications: ["Cardiovascular prevention", "Post-MI"],
+        contraindications: ["Active bleeding", "Allergy"],
+      },
+      {
+        name: "Atorvastatin",
+        category: "Statin",
+        dosages: ["10mg", "20mg", "40mg", "80mg"],
+        indications: ["Hyperlipidemia", "Cardiovascular prevention"],
+        contraindications: ["Active liver disease"],
+      },
+    ],
+  },
+
+  // Analytics and insights
+  analytics: {
+    dailyStats: {
+      totalAppointments: 8,
+      completedAppointments: 3,
+      pendingAppointments: 5,
+      cancelledAppointments: 0,
+      newPatients: 2,
+      followUps: 6,
+    },
+    weeklyStats: {
+      appointmentsThisWeek: 35,
+      avgPatientsPerDay: 7,
+      mostCommonCondition: "Hypertension",
+      patientSatisfaction: 4.8,
+    },
+    monthlyTrends: [
+      { month: "Jan", appointments: 120, newPatients: 25 },
+      { month: "Feb", appointments: 135, newPatients: 30 },
+      { month: "Mar", appointments: 142, newPatients: 28 },
+      { month: "Apr", appointments: 138, newPatients: 32 },
+      { month: "May", appointments: 155, newPatients: 35 },
+      { month: "Jun", appointments: 148, newPatients: 29 },
+      { month: "Jul", appointments: 162, newPatients: 38 },
+      { month: "Aug", appointments: 159, newPatients: 34 },
+      { month: "Sep", appointments: 95, newPatients: 18 },
+    ],
+    conditionBreakdown: [
+      { condition: "Hypertension", count: 45, percentage: 35 },
+      { condition: "Chest Pain", count: 25, percentage: 19 },
+      { condition: "Routine Checkup", count: 20, percentage: 15 },
+      { condition: "Post-Surgery", count: 15, percentage: 12 },
+      { condition: "Heart Disease", count: 12, percentage: 9 },
+      { condition: "Others", count: 13, percentage: 10 },
+    ],
+  },
+
+  // Appointment requests awaiting approval
+  pendingRequests: [
+    {
+      id: "REQ001",
+      patient: {
+        name: "Karim Rahman",
+        age: 45,
+        phone: "+8801888123456",
+        condition: "Chest discomfort",
+      },
+      requestedDate: "2024-09-22",
+      requestedTime: "10:00 AM",
+      urgency: "normal",
+      reason: "Experiencing chest discomfort for 2 days",
+      requestedOn: "2024-09-18",
+      status: "pending",
+    },
+    {
+      id: "REQ002",
+      patient: {
+        name: "Rashida Khatun",
+        age: 52,
+        phone: "+8801777234567",
+        condition: "Palpitations",
+      },
+      requestedDate: "2024-09-21",
+      requestedTime: "02:00 PM",
+      urgency: "high",
+      reason: "Frequent heart palpitations and dizziness",
+      requestedOn: "2024-09-18",
+      status: "pending",
+    },
+  ],
+};
+
+export default doctorData;
