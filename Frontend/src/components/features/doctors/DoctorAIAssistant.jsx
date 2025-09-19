@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Send, Bot, User, AlertCircle, Stethoscope } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import {
   Select,
   SelectContent,
@@ -252,9 +253,17 @@ export function DoctorAIAssistant() {
                         {message.isError && (
                           <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
                         )}
-                        <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere flex-1">
-                          {message.content}
-                        </p>
+                        <div className="text-sm break-words overflow-wrap-anywhere flex-1">
+                          {message.type === "bot" && !message.isError ? (
+                            <div className="markdown-content">
+                              <ReactMarkdown>{message.content}</ReactMarkdown>
+                            </div>
+                          ) : (
+                            <p className="whitespace-pre-wrap">
+                              {message.content}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )}
                     <div
