@@ -11,12 +11,12 @@ const { AppError } = require('./errorHandler');
  */
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
-  
+
   if (!errors.isEmpty()) {
     const errorMessages = errors.array().map(error => error.msg);
     return next(new AppError(`Validation Error: ${errorMessages.join(', ')}`, 400));
   }
-  
+
   next();
 };
 
@@ -48,20 +48,6 @@ const validateDoctorRegistration = [
     .withMessage('Password must be at least 8 characters long')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
     .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
-
-  body('specialization')
-    .notEmpty()
-    .withMessage('Specialization is required')
-    .isIn([
-      'Cardiology', 'Neurology', 'Pediatrics', 'Orthopedics', 'Dermatology',
-      'Internal Medicine', 'General Surgery', 'Psychiatry', 'Radiology',
-      'Anesthesiology', 'Emergency Medicine', 'Family Medicine',
-      'Obstetrics and Gynecology', 'Ophthalmology', 'Ear, Nose & Throat',
-      'Urology', 'Oncology', 'Endocrinology', 'Gastroenterology',
-      'Pulmonology', 'Nephrology', 'Rheumatology', 'Pathology',
-      'Physical Medicine', 'Plastic Surgery', 'General Practice'
-    ])
-    .withMessage('Please select a valid specialization'),
 
   body('licenseNumber')
     .notEmpty()
@@ -126,11 +112,11 @@ const validatePatientRegistration = [
       const birthDate = new Date(value);
       const today = new Date();
       const age = today.getFullYear() - birthDate.getFullYear();
-      
+
       if (age > 120 || birthDate > today) {
         throw new Error('Please provide a valid date of birth');
       }
-      
+
       return true;
     }),
 

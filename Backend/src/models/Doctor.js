@@ -48,6 +48,7 @@ const doctorSchema = new mongoose.Schema(
     // Professional Information
     specialization: {
       type: String,
+      default: "N/A",
       required: [true, 'Specialization is required'],
       enum: {
         values: SPECIALIZATIONS,
@@ -105,7 +106,7 @@ const doctorSchema = new mongoose.Schema(
         endDate: {
           type: Date,
           validate: {
-            validator: function(endDate) {
+            validator: function (endDate) {
               return !endDate || endDate > this.startDate;
             },
             message: 'End date must be after start date',
@@ -138,28 +139,28 @@ const doctorSchema = new mongoose.Schema(
         },
       },
     ],
-    
+
     // Performance Metrics
-    curedPatientsCount: { 
-      type: Number, 
+    curedPatientsCount: {
+      type: Number,
       default: 0,
       min: [0, 'Cured patients count cannot be negative'],
     },
     curedDiseases: [
       {
-        name: { 
-          type: String, 
+        name: {
+          type: String,
           required: true,
           trim: true,
         },
-        count: { 
-          type: Number, 
+        count: {
+          type: Number,
           default: 0,
           min: [0, 'Count cannot be negative'],
         },
       },
     ],
-    
+
     // Reviews and Ratings
     averageRating: {
       type: Number,
@@ -207,7 +208,7 @@ const doctorSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    
+
     // Password Reset
     passwordResetToken: {
       type: String,
@@ -217,7 +218,7 @@ const doctorSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
-    
+
     // System Preferences
     notificationPreferences: {
       email: {
@@ -233,19 +234,19 @@ const doctorSchema = new mongoose.Schema(
         default: true,
       },
     },
-    
+
     // Last Login
     lastLoginAt: {
       type: Date,
     },
-    
+
     // Account Status
     isActive: {
       type: Boolean,
       default: true,
     },
   },
-  { 
+  {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -261,12 +262,12 @@ doctorSchema.index({ status: 1 });
 doctorSchema.index({ 'hospitalAffiliations.name': 1 });
 
 // Virtual for full profile URL
-doctorSchema.virtual('profileUrl').get(function() {
+doctorSchema.virtual('profileUrl').get(function () {
   return `/api/v1/doctors/${this._id}`;
 });
 
 // Virtual for years of experience based on qualification
-doctorSchema.virtual('calculatedExperience').get(function() {
+doctorSchema.virtual('calculatedExperience').get(function () {
   if (this.qualifications && this.qualifications.length > 0) {
     const earliestYear = Math.min(...this.qualifications.map(q => q.year));
     return new Date().getFullYear() - earliestYear;
@@ -275,10 +276,10 @@ doctorSchema.virtual('calculatedExperience').get(function() {
 });
 
 // Pre-save middleware to hash password
-doctorSchema.pre('save', async function(next) {
+doctorSchema.pre('save', async function (next) {
   // Only hash password if it's been modified
   if (!this.isModified('passwordHash')) return next();
-  
+
   try {
     // Hash password with cost of 12
     const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
@@ -290,7 +291,7 @@ doctorSchema.pre('save', async function(next) {
 });
 
 // Pre-save middleware to generate doctorId if not provided
-doctorSchema.pre('save', async function(next) {
+doctorSchema.pre('save', async function (next) {
   if (this.isNew && !this.doctorId) {
     try {
       const generateId = require('../utils/generateId');
@@ -305,7 +306,7 @@ doctorSchema.pre('save', async function(next) {
 });
 
 // Instance method to check password
-doctorSchema.methods.checkPassword = async function(candidatePassword) {
+doctorSchema.methods.checkPassword = async function (candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.passwordHash);
   } catch (error) {
@@ -314,7 +315,7 @@ doctorSchema.methods.checkPassword = async function(candidatePassword) {
 };
 
 // Instance method to check if password was changed after JWT was issued
-doctorSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+doctorSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
     return JWTTimestamp < changedTimestamp;
@@ -323,22 +324,22 @@ doctorSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 };
 
 // Instance method to create password reset token
-doctorSchema.methods.createPasswordResetToken = function() {
+doctorSchema.methods.createPasswordResetToken = function () {
   const crypto = require('crypto');
   const resetToken = crypto.randomBytes(32).toString('hex');
-  
+
   this.passwordResetToken = crypto
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
-    
+
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-  
+
   return resetToken;
 };
 
 // Instance method to create email verification code
-doctorSchema.methods.createEmailVerificationCode = function() {
+doctorSchema.methods.createEmailVerificationCode = function () {
   const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
   this.emailVerificationCode = code;
   this.emailVerificationExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
@@ -346,12 +347,12 @@ doctorSchema.methods.createEmailVerificationCode = function() {
 };
 
 // Static method to find by doctorId
-doctorSchema.statics.findByDoctorId = function(doctorId) {
+doctorSchema.statics.findByDoctorId = function (doctorId) {
   return this.findOne({ doctorId });
 };
 
 // Static method to find verified doctors
-doctorSchema.statics.findVerified = function() {
+doctorSchema.statics.findVerified = function () {
   return this.find({ isVerified: true, status: ACCOUNT_STATUS.APPROVED });
 };
 

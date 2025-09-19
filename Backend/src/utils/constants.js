@@ -89,6 +89,7 @@ const SPECIALIZATIONS = [
   'Anesthesiology',
   'Emergency Medicine',
   'Family Medicine',
+  'N/A'
 ];
 
 // Days of Week

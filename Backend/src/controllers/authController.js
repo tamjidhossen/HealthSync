@@ -13,12 +13,12 @@ const generateId = require('../utils/generateId');
  * Register a new doctor
  */
 const registerDoctor = catchAsync(async (req, res, next) => {
-  const { 
-    fullName, 
-    email, 
-    phone, 
-    password, 
-    specialization, 
+  const {
+    fullName,
+    email,
+    phone,
+    password,
+    specialization,
     licenseNumber,
     qualifications,
     hospitalAffiliations,
@@ -26,7 +26,7 @@ const registerDoctor = catchAsync(async (req, res, next) => {
   } = req.body;
 
   // Validate required fields
-  if (!fullName || !email || !phone || !password || !specialization || !licenseNumber) {
+  if (!fullName || !email || !phone || !password || !licenseNumber) {
     return next(new AppError('Please provide all required fields', 400));
   }
   doctorId = await generateId.generateUniqueId("DOC");
@@ -59,12 +59,12 @@ const registerDoctor = catchAsync(async (req, res, next) => {
  * Register a new patient
  */
 const registerPatient = catchAsync(async (req, res, next) => {
-  const { 
-    fullName, 
-    email, 
-    phone, 
-    password, 
-    dateOfBirth, 
+  const {
+    fullName,
+    email,
+    phone,
+    password,
+    dateOfBirth,
     gender,
     bloodGroup,
     emergencyContact
@@ -293,7 +293,7 @@ const updatePassword = catchAsync(async (req, res, next) => {
 
   // Get user with password
   const user = req.user;
-  
+
   // Check current password
   if (!(await user.checkPassword(currentPassword))) {
     return next(new AppError('Current password is incorrect', 401));
