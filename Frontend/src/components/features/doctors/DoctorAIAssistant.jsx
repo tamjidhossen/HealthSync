@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Send, Bot, User, AlertCircle, Stethoscope } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import {
@@ -14,6 +13,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { doctorData } from "@/data/doctor-data";
 import { sendChatMessage } from "@/services/api/chat-api";
 
+// LocalStorage keys for persistence
+const STORAGE_KEYS = {
+  selectedPatient: "healthsync_doctor_selected_patient",
+  messages: "healthsync_doctor_chat_messages",
+};
+
 export function DoctorAIAssistant() {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -23,24 +28,81 @@ export function DoctorAIAssistant() {
   const chatContainerRef = useRef(null);
 
   // Get patient list from doctor data
-  const patientList = doctorData.patients || [];
+  const patientList = useMemo(() => doctorData.patients || [], []);
+
+  // Load persisted data on component mount
+  useEffect(() => {
+    try {
+      const savedPatient = localStorage.getItem(STORAGE_KEYS.selectedPatient);
+      const savedMessages = localStorage.getItem(STORAGE_KEYS.messages);
+
+      if (savedPatient) {
+        const patient = JSON.parse(savedPatient);
+        // Verify patient still exists in current patient list
+        const currentPatient = patientList.find((p) => p.id === patient.id);
+        if (currentPatient) {
+          setSelectedPatient(currentPatient);
+        }
+      }
+
+      if (savedMessages) {
+        const messages = JSON.parse(savedMessages);
+        setMessages(
+          messages.map((msg) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Error loading chat data from localStorage:", error);
+    }
+  }, [patientList]);
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.messages, JSON.stringify(messages));
+      } catch (error) {
+        console.error("Error saving messages to localStorage:", error);
+      }
+    }
+  }, [messages]);
+
+  // Save selected patient to localStorage whenever it changes
+  useEffect(() => {
+    if (selectedPatient) {
+      try {
+        localStorage.setItem(
+          STORAGE_KEYS.selectedPatient,
+          JSON.stringify(selectedPatient)
+        );
+      } catch (error) {
+        console.error("Error saving selected patient to localStorage:", error);
+      }
+    }
+  }, [selectedPatient]);
+
   const handlePatientSelect = (patientId) => {
     const patient = patientList.find((p) => p.id === patientId);
     setSelectedPatient(patient);
-    setMessages([
-      {
-        id: 1,
+
+    // Only start a new conversation if this is a different patient
+    if (!selectedPatient || selectedPatient.id !== patientId) {
+      const welcomeMessage = {
+        id: Date.now(),
         type: "bot",
         content: `Hello Dr. Rahman! I'm your AI medical assistant. I now have access to ${patient.name}'s medical records and can help you with diagnosis, treatment planning, medication reviews, and medical insights. How can I assist you today?`,
         timestamp: new Date(),
-      },
-    ]);
+      };
+      setMessages([welcomeMessage]);
+    }
   };
 
   // Dummy loading message for shimmer effect
@@ -126,7 +188,10 @@ export function DoctorAIAssistant() {
           </div>
 
           <div className="flex-1">
-            <Select onValueChange={handlePatientSelect}>
+            <Select
+              onValueChange={handlePatientSelect}
+              value={selectedPatient?.id || ""}
+            >
               <SelectTrigger className="w-full max-w-md bg-[#e1eeff] dark:bg-gray-800 border-blue-200 dark:border-gray-600">
                 <SelectValue placeholder="Select a patient to start consultation" />
               </SelectTrigger>
@@ -187,10 +252,8 @@ export function DoctorAIAssistant() {
             }}
           >
             {messages.map((message) => (
-              <motion.div
+              <div
                 key={message.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
                 className={`flex ${
                   message.type === "user" ? "justify-end" : "justify-start"
                 }`}
@@ -282,7 +345,7 @@ export function DoctorAIAssistant() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
             <div ref={messagesEndRef} />
           </div>

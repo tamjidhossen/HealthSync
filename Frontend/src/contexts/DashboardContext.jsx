@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useCallback } from "react";
 
 const DashboardContext = createContext({
   activeTab: null,
@@ -12,8 +12,26 @@ const DashboardContext = createContext({
 export { DashboardContext };
 
 export function DashboardProvider({ children }) {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTabState] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Enhanced setActiveTab that triggers scroll behavior
+  const setActiveTab = useCallback((tab) => {
+    setActiveTabState(tab);
+
+    // Scroll main content to top with a small delay
+    setTimeout(() => {
+      const mainElement = document.querySelector(
+        'main[class*="overflow-auto"]'
+      );
+      if (mainElement) {
+        mainElement.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+    }, 50);
+  }, []);
   const [notifications, setNotifications] = useState([
     {
       id: 1,

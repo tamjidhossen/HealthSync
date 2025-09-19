@@ -15,13 +15,13 @@ export function DashboardLayout({
   return (
     <div className={cn("min-h-screen bg-background", className)}>
       <TopBar />
-      <div className="relative">
+      <div className="relative h-[calc(100vh-4rem)]">
         <DashboardSidebar />
         <MainContent
           padding={contentPadding}
           scroll={contentScroll}
           className={cn(
-            "transition-all duration-300 ease-in-out min-h-[calc(100vh-4rem)]",
+            "transition-all duration-300 ease-in-out",
             sidebarOpen ? "ml-64" : "ml-0"
           )}
         >
