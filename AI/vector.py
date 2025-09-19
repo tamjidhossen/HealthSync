@@ -28,7 +28,6 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 
 db_location = VECTOR_DB_PATH
-add_documents = not os.path.exists(db_location)
 
 # Create vector store
 vector_store = Chroma(
@@ -36,6 +35,20 @@ vector_store = Chroma(
     persist_directory=db_location,
     embedding_function=embeddings
 )
+
+# Check if there's already data in the vector store
+existing_data = vector_store.get()
+existing_count = len(existing_data['documents']) if existing_data['documents'] else 0
+
+print(f"Found {existing_count} existing chunks in vector store")
+
+# Only add documents if the vector store is empty
+add_documents = existing_count == 0
+
+if add_documents:
+    print("Vector store is empty. Adding new documents...")
+else:
+    print("Vector store already contains data. Skipping document embedding.")
 
 if add_documents:
     documents = []
