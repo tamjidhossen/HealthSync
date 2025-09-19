@@ -1,4 +1,4 @@
-"""Configuration settings for the University Helpdesk Chatbot"""
+"""Configuration settings for the HealthSync Medical Chatbot"""
 
 import os
 from dotenv import load_dotenv
@@ -23,7 +23,7 @@ EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "gemini")
 
 # Vector store configuration
 VECTOR_DB_PATH = "./chroma_langchain_db"
-COLLECTION_NAME = "university_helpdesk"
+COLLECTION_NAME = "healthsync_patients"
 
 # Text splitting configuration
 CHUNK_SIZE = 1000
@@ -34,23 +34,34 @@ RETRIEVAL_K = 10
 
 # Data paths
 DATA_DIR = "Data"
-QA_FILE = os.path.join(DATA_DIR, "Q&A.txt")
-STRUCTURE_FILE = os.path.join(DATA_DIR, "structure_data.json")
+PATIENT_DATA_FILES = ["patient1.txt", "patient2.txt", "patient3.txt", "patient4.txt"]
 
-# University information
-UNIVERSITY_NAME = "Jatiya Kabi Kazi Nazrul Islam University"
+# Patient ID mapping
+PATIENT_IDS = {
+    "patient1.txt": "PAT-12345",
+    "patient2.txt": "PAT-56789", 
+    "patient3.txt": "PAT-98765",
+    "patient4.txt": "PAT-11111"
+}
+
+# Medical system information
+HOSPITAL_NAME = "HealthSync Medical Center"
 
 # Chatbot prompt template
 CHATBOT_TEMPLATE = """
-You are a helpful university helpdesk chatbot for {university_name}.
+You are HealthSync AI, a medical assistant chatbot designed to help doctors access patient medical history and records.
 
-Answer the question based only on the following context: {{context}}
+Based on the following patient medical records and context: {{context}}
 
-Question: {{question}}
+Question from Doctor: {{question}}
 
 Instructions:
-- Provide accurate and helpful information based on the context
-- If the context doesn't contain enough information to answer the question, say "I don't have enough information to answer that question. Please contact the university directly."
-- Be friendly and professional
-- Include relevant contact information when appropriate
-""".format(university_name=UNIVERSITY_NAME)
+- You are assisting a licensed medical professional
+- Provide medical information based only on the patient records in the context
+- Present information in a clear, clinical format suitable for healthcare professionals
+- Include relevant dates, test results, medications, and medical history when available
+- If the context doesn't contain enough information to answer the question, say "The available patient records do not contain sufficient information to answer that question."
+- Focus on factual medical data from the patient's records
+- When discussing medications, include dosages and administration details if available
+- For laboratory results, include reference ranges and dates when provided
+""".format(hospital_name=HOSPITAL_NAME)

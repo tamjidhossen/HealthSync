@@ -9,7 +9,7 @@ import time
 from config import (
     GEMINI_EMBEDDING_MODEL, OLLAMA_EMBEDDING_MODEL, VECTOR_DB_PATH, COLLECTION_NAME,
     CHUNK_SIZE, CHUNK_OVERLAP, RETRIEVAL_K,
-    QA_FILE, STRUCTURE_FILE
+    DATA_DIR, PATIENT_DATA_FILES, PATIENT_IDS
 )
 
 
@@ -41,33 +41,60 @@ if add_documents:
     documents = []
     
     total_chunks = 0
-    for num in range(15):
-        # Load and chunk Teachers data
-        with open(f"Data/CSE_Teachers/t{num + 1}.txt", "r", encoding="utf-8") as f:
-            teacher_content = f.read()
+    
+    # Load and chunk patient data
+    for patient_file in PATIENT_DATA_FILES:
+        patient_id = PATIENT_IDS[patient_file]
+        file_path = os.path.join(DATA_DIR, patient_file)
         
-        # Split Teachers content into chunks
-        teacher_chunks = text_splitter.split_text(teacher_content)
+        print(f"Processing {patient_file} with ID {patient_id}")
         
-        for i, chunk in enumerate(teacher_chunks):
-            if chunk.strip():
-                document = Document(
-                    page_content=chunk.strip(),
-                    metadata={"source": f"t{num + 1}.txt", "chunk": i}
-                )
-                documents.append(document)
-        
-        doc_len = len(documents)
-        if doc_len >= 50: 
-            total_chunks += doc_len
-            print(f"Adding {doc_len} chunks to vectore store")
-            vector_store.add_documents(documents=documents)
-            documents = []
-            # time.sleep(60) # gemini embedding has 30,000 TPM
-
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                patient_content = f.read()
+            
+            # Split patient content into chunks
+            patient_chunks = text_splitter.split_text(patient_content)
+            
+            for i, chunk in enumerate(patient_chunks):
+                if chunk.strip():
+                    document = Document(
+                        page_content=chunk.strip(),
+                        metadata={
+                            "source": patient_file,
+                            "patient_id": patient_id,
+                            "chunk": i,
+                            "document_type": "patient_record"
+                        }
+                    )
+                    documents.append(document)
+            
+            print(f"Added {len(patient_chunks)} chunks for patient {patient_id}")
+            
+        except FileNotFoundError:
+            print(f"Warning: File {file_path} not found, skipping...")
+            continue
+        except Exception as e:
+            print(f"Error processing {patient_file}: {str(e)}")
+            continue
+    
+    # Add all patient documents to vector store
     if documents:
+        print(f"Adding {len(documents)} total patient record chunks to vector store")
         vector_store.add_documents(documents=documents)
-
-    print(f"Total chunks added: {total_chunks}")
+        total_chunks = len(documents)
+    
+    print(f"Total patient record chunks added: {total_chunks}")
     
 retriever = vector_store.as_retriever(search_kwargs={"k": RETRIEVAL_K})
+
+def get_patient_specific_retriever(patient_id):
+    """
+    Create a retriever that only searches for documents of a specific patient
+    """
+    return vector_store.as_retriever(
+        search_kwargs={
+            "k": RETRIEVAL_K,
+            "filter": {"patient_id": patient_id}
+        }
+    )
