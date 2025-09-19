@@ -1,8 +1,6 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import React, { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Send, Bot, User, AlertCircle, Stethoscope } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -12,27 +10,23 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Send,
-  MessageCircle,
-  Stethoscope,
-  Pill,
-  FileText,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-  User,
-} from "lucide-react";
 import { doctorData } from "@/data/doctor-data";
 
-const DoctorAIAssistant = () => {
+export function DoctorAIAssistant() {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   // Get patient list from doctor data
   const patientList = doctorData.patients || [];
+
+  // Auto scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handlePatientSelect = (patientId) => {
     const patient = patientList.find((p) => p.id === patientId);
@@ -40,384 +34,411 @@ const DoctorAIAssistant = () => {
     setMessages([
       {
         id: 1,
-        sender: "AI",
-        content: `Hello! I'm your AI medical assistant. I have access to ${patient.name}'s medical records. How can I help you today?`,
-        timestamp: new Date().toLocaleTimeString(),
+        type: "bot",
+        content: `Hello Dr. Rahman! I'm your AI medical assistant. I now have access to ${patient.name}'s medical records and can help you with diagnosis, treatment planning, medication reviews, and medical insights. How can I assist you today?`,
+        timestamp: new Date(),
       },
     ]);
   };
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedPatient) return;
+  // Dummy loading message for shimmer effect
+  const loadingMessage = {
+    id: "loading",
+    type: "bot",
+    content: "Analyzing patient data and medical records...",
+    timestamp: new Date(),
+    isLoading: true,
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!inputMessage.trim() || isLoading || !selectedPatient) return;
 
     const userMessage = {
-      id: messages.length + 1,
-      sender: "Doctor",
-      content: newMessage,
-      timestamp: new Date().toLocaleTimeString(),
+      id: Date.now(),
+      type: "user",
+      content: inputMessage,
+      timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setNewMessage("");
-    setIsTyping(true);
+    setInputMessage("");
+    setIsLoading(true);
 
-    // Simulate AI response with medical context
-    setTimeout(() => {
-      let aiResponse = "";
+    // Add loading message
+    setMessages((prev) => [...prev, loadingMessage]);
 
-      if (
-        newMessage.toLowerCase().includes("diagnosis") ||
-        newMessage.toLowerCase().includes("diagnose")
-      ) {
-        aiResponse = `Based on ${
-          selectedPatient.name
-        }'s recent symptoms and medical history, I recommend considering differential diagnosis including viral infection, bacterial complications, or chronic condition exacerbation. Current vital signs show: BP ${
-          selectedPatient.vitals?.bloodPressure || "120/80"
-        }, HR ${
-          selectedPatient.vitals?.heartRate || "72 bpm"
-        }. Would you like me to analyze specific lab results or symptoms?`;
-      } else if (
-        newMessage.toLowerCase().includes("medication") ||
-        newMessage.toLowerCase().includes("prescription")
-      ) {
-        aiResponse = `${selectedPatient.name} is currently on: ${
-          selectedPatient.medications?.map((med) => med.name).join(", ") ||
-          "No current medications"
-        }. For drug interactions and dosage recommendations, please consider patient's age (${
-          selectedPatient.age
-        }), weight, and current condition. Any specific medication you'd like to prescribe or modify?`;
-      } else if (
-        newMessage.toLowerCase().includes("test") ||
-        newMessage.toLowerCase().includes("lab")
-      ) {
-        aiResponse = `Latest lab results for ${
-          selectedPatient.name
-        }: Recent tests show ${
-          selectedPatient.condition || "stable condition"
-        }. I recommend ordering: Complete Blood Count, Comprehensive Metabolic Panel, and condition-specific tests based on current symptoms. Shall I prepare the lab order forms?`;
-      } else if (
-        newMessage.toLowerCase().includes("history") ||
-        newMessage.toLowerCase().includes("medical record")
-      ) {
-        aiResponse = `${
-          selectedPatient.name
-        }'s medical history includes: Previous conditions, allergies, and family history. Age: ${
-          selectedPatient.age
-        }, Gender: ${selectedPatient.gender}, Current status: ${
-          selectedPatient.condition
-        }. Emergency contact: ${
-          selectedPatient.emergencyContact || "On file"
-        }. What specific aspect would you like to review?`;
-      } else {
-        aiResponse = `I understand you're asking about ${selectedPatient.name}. As your AI medical assistant, I can help with diagnosis suggestions, medication reviews, lab interpretations, treatment planning, or patient history analysis. Could you be more specific about what medical assistance you need?`;
-      }
+    try {
+      // Simulate AI response delay
+      setTimeout(() => {
+        const botResponse = {
+          id: Date.now() + 1,
+          type: "bot",
+          content: generateDoctorAIResponse(inputMessage, selectedPatient),
+          timestamp: new Date(),
+          responseTime: (Math.random() * 2 + 1).toFixed(1),
+        };
 
-      const aiMessage = {
-        id: messages.length + 2,
-        sender: "AI",
-        content: aiResponse,
-        timestamp: new Date().toLocaleTimeString(),
+        setMessages((prev) =>
+          prev.filter((msg) => msg.id !== "loading").concat(botResponse)
+        );
+        setIsLoading(false);
+      }, 1500);
+    } catch (error) {
+      console.error("Chat error:", error);
+
+      const errorResponse = {
+        id: Date.now() + 1,
+        type: "bot",
+        content:
+          "I'm sorry, I encountered an error while analyzing the medical data. Please try again or consult with other medical resources.",
+        timestamp: new Date(),
+        isError: true,
       };
 
-      setMessages((prev) => [...prev, aiMessage]);
-      setIsTyping(false);
-    }, 1500);
+      setMessages((prev) =>
+        prev.filter((msg) => msg.id !== "loading").concat(errorResponse)
+      );
+      setIsLoading(false);
+    }
   };
 
-  const quickActions = [
-    {
-      label: "Diagnosis Help",
-      icon: Stethoscope,
-      query: "Help me with diagnosis for current symptoms",
-    },
-    {
-      label: "Medication Review",
-      icon: Pill,
-      query: "Review current medications and suggest adjustments",
-    },
-    {
-      label: "Lab Results",
-      icon: FileText,
-      query: "Analyze latest lab test results",
-    },
-    {
-      label: "Medical History",
-      icon: Clock,
-      query: "Review complete medical history and previous treatments",
-    },
-  ];
+  const generateDoctorAIResponse = (message, patient) => {
+    const lowerMessage = message.toLowerCase();
 
-  const handleQuickAction = (query) => {
-    setNewMessage(query);
+    // Medical history responses
+    if (
+      lowerMessage.includes("history") ||
+      lowerMessage.includes("medical record")
+    ) {
+      return `${patient.name}'s medical history shows: 
+      • Current condition: ${patient.condition}
+      • Age: ${patient.age}, Gender: ${patient.gender}
+      • Blood type: ${patient.bloodType}
+      • Status: ${patient.status}
+      • Last visit: ${patient.lastVisit}
+      • Current vitals: BP ${patient.vitalSigns?.bloodPressure}, HR ${patient.vitalSigns?.heartRate}
+      
+      Recent medical history includes documented treatments and ongoing care. Would you like me to elaborate on any specific aspect?`;
+    }
+
+    // Medication-related responses
+    if (
+      lowerMessage.includes("medication") ||
+      lowerMessage.includes("prescription") ||
+      lowerMessage.includes("drug")
+    ) {
+      const medications = patient.currentMedications || [];
+      const medsList =
+        medications.length > 0
+          ? medications
+              .map((med) => `${med.name} ${med.dosage} (${med.frequency})`)
+              .join(", ")
+          : "No current medications on record";
+
+      return `Current medications for ${patient.name}:
+      ${medsList}
+      
+      Based on the patient's condition (${patient.condition}) and current status (${patient.status}), I can help review drug interactions, dosage adjustments, or suggest additional treatments. What specific medication inquiry do you have?`;
+    }
+
+    // Diagnosis and assessment
+    if (
+      lowerMessage.includes("diagnosis") ||
+      lowerMessage.includes("assess") ||
+      lowerMessage.includes("symptoms")
+    ) {
+      return `For ${patient.name}'s current condition (${patient.condition}):
+      • Current status: ${patient.status}
+      • Vital signs: ${patient.vitalSigns?.bloodPressure} BP, ${patient.vitalSigns?.heartRate} HR
+      • Patient profile: ${patient.age}-year-old ${patient.gender}
+      
+      Based on the medical data, I recommend continuing current monitoring protocols. The patient's condition appears ${patient.status}. Would you like me to suggest specific diagnostic tests or treatment modifications?`;
+    }
+
+    // Lab and test results
+    if (
+      lowerMessage.includes("lab") ||
+      lowerMessage.includes("test") ||
+      lowerMessage.includes("result")
+    ) {
+      return `Lab and diagnostic recommendations for ${patient.name}:
+      • Current vitals are within acceptable ranges for their condition
+      • Blood pressure: ${patient.vitalSigns?.bloodPressure}
+      • Heart rate: ${patient.vitalSigns?.heartRate}
+      • Weight: ${patient.vitalSigns?.weight}
+      
+      Consider ordering follow-up tests based on ${patient.condition} protocols. I can help interpret results and suggest appropriate monitoring intervals.`;
+    }
+
+    // Treatment planning
+    if (
+      lowerMessage.includes("treatment") ||
+      lowerMessage.includes("plan") ||
+      lowerMessage.includes("therapy")
+    ) {
+      return `Treatment planning for ${patient.name}:
+      • Current condition: ${patient.condition} (${patient.status})
+      • Age considerations: ${patient.age} years old
+      • Current treatment appears effective based on ${patient.status} status
+      
+      I recommend continuing current care protocols with regular monitoring. Would you like me to suggest modifications to the treatment plan or discuss alternative approaches?`;
+    }
+
+    // Default response
+    return `I'm here to help with ${patient.name}'s medical care. I can assist with:
+    • Medical history review and analysis
+    • Medication management and interactions
+    • Diagnostic recommendations and test interpretation
+    • Treatment planning and modifications
+    • Clinical decision support
+    
+    Patient summary: ${patient.age}-year-old ${patient.gender} with ${patient.condition}, currently ${patient.status}. What specific medical guidance do you need?`;
+  };
+
+  const formatTime = (timestamp) => {
+    return timestamp.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center space-x-3">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          <MessageCircle className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">
-            AI Medical Assistant
-          </h2>
-          <p className="text-muted-foreground">
-            Get intelligent medical insights and recommendations
-          </p>
+    <div className="relative h-[calc(100vh-8rem)] flex flex-col">
+      {/* Sticky Patient Selection Header */}
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <Stethoscope className="h-5 w-5 text-[#53a2e3]" />
+            <h2 className="font-semibold text-gray-800 dark:text-gray-100">
+              AI Medical Assistant
+            </h2>
+          </div>
+
+          <div className="flex-1">
+            <Select onValueChange={handlePatientSelect}>
+              <SelectTrigger className="w-full max-w-md bg-[#e1eeff] dark:bg-gray-800 border-blue-200 dark:border-gray-600">
+                <SelectValue placeholder="Select a patient to start consultation" />
+              </SelectTrigger>
+              <SelectContent>
+                {patientList.map((patient) => (
+                  <SelectItem key={patient.id} value={patient.id}>
+                    <div className="flex items-center space-x-3 py-1">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage
+                          src={patient.profilePicture}
+                          alt={patient.name}
+                        />
+                        <AvatarFallback className="text-xs">
+                          {patient.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium">{patient.name}</span>
+                        <Badge
+                          variant={
+                            patient.status === "stable"
+                              ? "default"
+                              : "destructive"
+                          }
+                          className="text-xs"
+                        >
+                          {patient.condition}
+                        </Badge>
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {selectedPatient && (
+            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>Active: {selectedPatient.name}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Patient Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <User className="h-5 w-5" />
-            <span>Select Patient</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select onValueChange={handlePatientSelect}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choose a patient to start consultation" />
-            </SelectTrigger>
-            <SelectContent>
-              {patientList.map((patient) => (
-                <SelectItem key={patient.id} value={patient.id}>
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={patient.avatar} alt={patient.name} />
-                      <AvatarFallback>
-                        {patient.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span>{patient.name}</span>
-                    <Badge variant="outline" className="ml-auto">
-                      {patient.condition}
-                    </Badge>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {selectedPatient && (
-            <div className="mt-4 p-4 bg-muted/20 border border-border rounded-lg">
-              <div className="flex items-center space-x-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage
-                    src={selectedPatient.avatar}
-                    alt={selectedPatient.name}
-                  />
-                  <AvatarFallback>
-                    {selectedPatient.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h4 className="font-semibold text-foreground">
-                    {selectedPatient.name}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedPatient.age} years old • {selectedPatient.gender} •{" "}
-                    {selectedPatient.condition}
-                  </p>
-                </div>
-                <div className="ml-auto">
-                  <Badge
-                    variant={
-                      selectedPatient.condition === "Stable"
-                        ? "default"
-                        : "destructive"
-                    }
-                  >
-                    {selectedPatient.condition}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Chat Interface */}
-      {selectedPatient && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Medical Consultation - {selectedPatient.name}</span>
-              <div className="flex items-center space-x-2">
-                <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-muted-foreground">
-                  AI Assistant Active
-                </span>
-              </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-4">
-              {/* Quick Actions */}
-              <div>
-                <p className="text-sm font-medium text-foreground mb-3">
-                  Quick Actions:
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  {quickActions.map((action, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleQuickAction(action.query)}
-                      className="justify-start space-x-2 h-auto p-3"
-                    >
-                      <action.icon className="h-4 w-4" />
-                      <span>{action.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="h-96 overflow-y-auto space-y-4 p-4 bg-muted/10 border border-border rounded-lg">
-                {messages.map((message) => (
+      {selectedPatient ? (
+        <>
+          {/* Chat Messages Area */}
+          <div
+            ref={chatContainerRef}
+            className="flex-1 overflow-y-auto space-y-4 p-6 pb-24"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "#53a2e3 transparent",
+            }}
+          >
+            {messages.map((message) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex ${
+                  message.type === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`flex max-w-[85%] sm:max-w-[80%] ${
+                    message.type === "user" ? "flex-row-reverse" : "flex-row"
+                  }`}
+                >
+                  {/* Avatar */}
                   <div
-                    key={message.id}
-                    className={`flex ${
-                      message.sender === "Doctor"
-                        ? "justify-end"
-                        : "justify-start"
+                    className={`flex-shrink-0 ${
+                      message.type === "user" ? "ml-3" : "mr-3"
                     }`}
                   >
                     <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.sender === "Doctor"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-card border border-border text-card-foreground"
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        message.type === "user"
+                          ? "bg-[#53a2e3]"
+                          : "bg-[#53a2e3]"
                       }`}
                     >
-                      <div className="flex items-center space-x-2 mb-1">
-                        {message.sender === "AI" && (
-                          <Stethoscope className="h-4 w-4" />
-                        )}
-                        <span className="text-xs font-medium">
-                          {message.sender === "Doctor"
-                            ? "Dr. You"
-                            : "AI Assistant"}
-                        </span>
-                        <span className="text-xs opacity-70">
-                          {message.timestamp}
-                        </span>
-                      </div>
-                      <p className="text-sm">{message.content}</p>
+                      {message.type === "user" ? (
+                        <User className="w-4 h-4 text-white" />
+                      ) : (
+                        <Stethoscope className="w-4 h-4 text-white" />
+                      )}
                     </div>
                   </div>
-                ))}
 
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-card border border-border text-card-foreground px-4 py-2 rounded-lg">
+                  {/* Message Content */}
+                  <div
+                    className={`rounded-2xl px-4 py-3 max-w-full break-words ${
+                      message.type === "user"
+                        ? "bg-[#53a2e3] text-white"
+                        : message.isError
+                        ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-700"
+                        : "bg-[#e1eeff] dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+                    }`}
+                  >
+                    {message.isLoading ? (
                       <div className="flex items-center space-x-2">
-                        <Stethoscope className="h-4 w-4" />
-                        <span className="text-xs font-medium">
-                          AI Assistant
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-[#53a2e3] rounded-full animate-bounce"></div>
+                          <div
+                            className="w-2 h-2 bg-[#53a2e3] rounded-full animate-bounce"
+                            style={{ animationDelay: "0.1s" }}
+                          ></div>
+                          <div
+                            className="w-2 h-2 bg-[#53a2e3] rounded-full animate-bounce"
+                            style={{ animationDelay: "0.2s" }}
+                          ></div>
+                        </div>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          {message.content}
                         </span>
                       </div>
-                      <div className="flex space-x-1 mt-1">
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-                        <div
-                          className="w-2 h-2 bg-current rounded-full animate-bounce"
-                          style={{ animationDelay: "0.1s" }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 bg-current rounded-full animate-bounce"
-                          style={{ animationDelay: "0.2s" }}
-                        ></div>
+                    ) : (
+                      <div className="flex items-start space-x-2">
+                        {message.isError && (
+                          <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                        )}
+                        <p className="text-sm whitespace-pre-wrap break-words overflow-wrap-anywhere flex-1">
+                          {message.content}
+                        </p>
                       </div>
+                    )}
+                    <div
+                      className={`text-xs mt-1 opacity-70 flex items-center justify-between ${
+                        message.type === "user"
+                          ? "text-blue-100"
+                          : message.isError
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-gray-500 dark:text-gray-400"
+                      }`}
+                    >
+                      <span>{formatTime(message.timestamp)}</span>
+                      {message.responseTime && !message.isError && (
+                        <span className="ml-2">({message.responseTime}s)</span>
+                      )}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              </motion.div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
 
-              {/* Message Input */}
-              <div className="flex space-x-2">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Ask about diagnosis, medications, tests, or medical history..."
-                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                  className="flex-1"
+          {/* Fixed Input Area at Bottom */}
+          <div className="absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-900 shadow-lg">
+            <form onSubmit={handleSendMessage}>
+              <div className="relative bg-[#e1eeff] dark:bg-gray-800 rounded-xl border border-blue-200 dark:border-gray-600 focus-within:border-[#53a2e3] transition-colors">
+                <input
+                  type="text"
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  placeholder={`Ask about ${selectedPatient.name}'s diagnosis, medications, treatment plan, or medical history...`}
+                  disabled={isLoading}
+                  className="w-full bg-transparent px-6 py-4 pr-14 text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none transition-all duration-200 disabled:opacity-50 rounded-xl"
                 />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim() || isTyping}
-                  size="icon"
+                <button
+                  type="submit"
+                  disabled={!inputMessage.trim() || isLoading}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#53a2e3] hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white p-2.5 rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
                 >
-                  <Send className="h-4 w-4" />
-                </Button>
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+          </div>
+        </>
+      ) : (
+        /* No Patient Selected State */
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center space-y-6 max-w-md">
+            <div className="p-4 bg-[#e1eeff] dark:bg-gray-800 rounded-full w-20 h-20 mx-auto flex items-center justify-center">
+              <Stethoscope className="h-10 w-10 text-[#53a2e3]" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                AI Medical Assistant
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Select a patient from the dropdown above to start an intelligent
+                medical consultation
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 text-left bg-[#e1eeff] dark:bg-gray-800 p-4 rounded-lg">
+              <div className="flex items-center space-x-2 text-sm">
+                <div className="w-2 h-2 bg-[#53a2e3] rounded-full"></div>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Patient medical history analysis
+                </span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm">
+                <div className="w-2 h-2 bg-[#53a2e3] rounded-full"></div>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Medication review and interactions
+                </span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm">
+                <div className="w-2 h-2 bg-[#53a2e3] rounded-full"></div>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Diagnostic recommendations
+                </span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm">
+                <div className="w-2 h-2 bg-[#53a2e3] rounded-full"></div>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Treatment planning assistance
+                </span>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Tips */}
-      {!selectedPatient && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <div className="p-4 bg-primary/10 rounded-full w-16 h-16 mx-auto flex items-center justify-center">
-                <MessageCircle className="h-8 w-8 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">
-                  AI Medical Assistant
-                </h3>
-                <p className="text-muted-foreground">
-                  Select a patient above to start an intelligent medical
-                  consultation
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-left">
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-foreground">
-                      Diagnosis assistance
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-foreground">
-                      Medication reviews
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-foreground">
-                      Lab result analysis
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-foreground">
-                      Medical history insights
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
-};
+}
 
-export default DoctorAIAssistant;
+export { DoctorAIAssistant as default };
