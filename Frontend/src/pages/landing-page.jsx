@@ -260,12 +260,12 @@ const LandingPage = () => {
               Everything{" "}
               <span className="font-light text-gray-300">you need</span>
             </h2>
-            <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto font-light opacity-80">
+            {/* <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto font-light opacity-80">
               Powerful features designed to{" "}
               <span className="font-medium text-gray-200">
                 enhance your campus experience
               </span>
-            </p>
+            </p> */}
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">

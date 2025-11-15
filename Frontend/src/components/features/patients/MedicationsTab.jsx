@@ -18,11 +18,11 @@ export function MedicationsTab() {
       </div>
 
       <Tabs defaultValue="current" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="current">Current Medications</TabsTrigger>
           <TabsTrigger value="reminders">Reminders</TabsTrigger>
-          <TabsTrigger value="side-effects">Side Effects</TabsTrigger>
-          <TabsTrigger value="history">Prescription History</TabsTrigger>
+          {/* <TabsTrigger value="side-effects">Side Effects</TabsTrigger> */}
+          {/* <TabsTrigger value="history">Prescription History</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="current" className="space-y-6">

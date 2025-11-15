@@ -18,11 +18,11 @@ export function MedicalRecordsTab() {
       </div>
 
       <Tabs defaultValue="timeline" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="timeline">Medical History</TabsTrigger>
           <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
           <TabsTrigger value="lab-results">Lab Results</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          {/* <TabsTrigger value="documents">Documents</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="timeline" className="space-y-6">

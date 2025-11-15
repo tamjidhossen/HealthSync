@@ -70,27 +70,25 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
-      <div className="container flex h-16 items-center px-6">
-        <div className="mr-6 flex">
+      <div className="flex h-16 items-center justify-between px-6 w-full">
+        <div className="flex items-center">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="h-10 w-10 hover:bg-primary/10 hover:text-primary transition-colors"
+            className="h-10 w-10 hover:bg-primary/10 hover:text-primary transition-colors mr-6"
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle sidebar</span>
           </Button>
-        </div>
-
-        <div className="flex flex-1 items-center justify-between space-x-4">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <span className="text-sm font-medium text-muted-foreground md:hidden">
+          <div className="md:hidden">
+            <span className="text-sm font-medium text-muted-foreground">
               HealthSync Dashboard
             </span>
           </div>
+        </div>
 
-          <nav className="flex items-center space-x-3 pr-2">
+        <nav className="flex items-center space-x-3">
             {/* Notifications */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -235,7 +233,6 @@ export function TopBar() {
             </DropdownMenu>
           </nav>
         </div>
-      </div>
-    </header>
-  );
-}
+      </header>
+    );
+  }

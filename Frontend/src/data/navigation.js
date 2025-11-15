@@ -56,19 +56,9 @@ export const navigationConfig = {
       icon: Calendar,
     },
     {
-      title: "Patient Management",
-      url: "/dashboard/patients",
-      icon: Users,
-    },
-    {
       title: "AI Assistant",
       url: "/dashboard/ai-assistant",
       icon: MessageCircle,
-    },
-    {
-      title: "Patient Records",
-      url: "/dashboard/records",
-      icon: FileText,
     },
     {
       title: "Appointments",
@@ -149,21 +139,21 @@ export const navigationConfig = {
       url: "/dashboard/users",
       icon: Users,
     },
-    {
-      title: "System Monitoring",
-      url: "/dashboard/monitoring",
-      icon: Activity,
-    },
-    {
-      title: "Audit Dashboard",
-      url: "/dashboard/audit",
-      icon: BarChart3,
-    },
-    {
-      title: "Configuration",
-      url: "/dashboard/config",
-      icon: Settings,
-    },
+    // {
+    //   title: "System Monitoring",
+    //   url: "/dashboard/monitoring",
+    //   icon: Activity,
+    // },
+    // {
+    //   title: "Audit Dashboard",
+    //   url: "/dashboard/audit",
+    //   icon: BarChart3,
+    // },
+    // {
+    //   title: "Configuration",
+    //   url: "/dashboard/config",
+    //   icon: Settings,
+    // },
   ],
 };
 

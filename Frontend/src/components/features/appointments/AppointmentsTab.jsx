@@ -18,9 +18,9 @@ export function AppointmentsTab() {
       </div>
 
       <Tabs defaultValue="upcoming" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="request">Request New</TabsTrigger>
+          {/* <TabsTrigger value="request">Request New</TabsTrigger> */}
           <TabsTrigger value="status">All Appointments</TabsTrigger>
           <TabsTrigger value="calendar">Calendar View</TabsTrigger>
         </TabsList>

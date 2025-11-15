@@ -137,13 +137,13 @@ const TodaysSchedule = () => {
                     </p>
                   </div>
 
-                  <Avatar className="h-12 w-12">
+                  {/* <Avatar className="h-12 w-12">
                     <img
                       src={appointment.patient.profilePicture}
                       alt={appointment.patient.name}
                       className="rounded-full object-cover"
                     />
-                  </Avatar>
+                  </Avatar> */}
 
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ const TodaysSchedule = () => {
       </Card>
 
       {/* Pending Requests */}
-      {pendingRequests.length > 0 && (
+      {/* {pendingRequests.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -243,7 +243,7 @@ const TodaysSchedule = () => {
             </div>
           </CardContent>
         </Card>
-      )}
+      )} */}
 
       {/* Appointment Detail Modal/Panel */}
       {selectedAppointment && (
